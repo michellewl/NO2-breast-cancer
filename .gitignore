@@ -1,4 +1,5 @@
 # Gitignore
 *.xls
 *.xlsx
+.idea/
 
