@@ -77,6 +77,12 @@ def group_ages(dataframe, start, end):
     return dataframe
 
 def set_new_header(df, keyword):
+    """
+    Function to extract actual data table from Excel sheet with written blurb at the top.
+    :param df: Pandas dataframe object of loaded Excel sheet.
+    :param keyword: First column name.
+    :return: Pandas dataframe object with header row starting with given keyword.
+    """
     col_names = df.copy().columns.tolist()
 
     header_idx = df.index[df[col_names[0]] == keyword][0]
