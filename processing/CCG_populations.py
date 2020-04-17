@@ -37,7 +37,17 @@ for file in filepaths:
 df = fn.load_df_from_xlsheet(years_2012_to_18[0], re.compile(r"\wemale"))
 df = fn.set_new_header(df, "Area Codes ")
 col_names = df.copy().columns.tolist()
-#print(col_names)
 london_df = fn.get_area_df(df, 1, "London", "NHS England London")
-print(london_df)
+
+col_names[1] = "Unknown1"
+col_names[2] = "Unknown2"
+london_df.columns = col_names
+
+ccg_col = "Area Names"
+london_ccg_df = london_df.loc[london_df[ccg_col].notna()].drop(columns=["Unknown1", "Unknown2"])
+london_ccg_df.rename(columns= {ccg_col:"CCG", "90+":90},inplace=True)
+london_ccg_df = fn.group_ages(london_ccg_df, 0, 40)
+london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
+london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
+print(london_ccg_df)
 
