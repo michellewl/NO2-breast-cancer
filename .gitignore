@@ -2,4 +2,5 @@
 *.xls
 *.xlsx
 .idea/
+*__pycache__/
 
