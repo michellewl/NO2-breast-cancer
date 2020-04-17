@@ -75,3 +75,13 @@ def group_ages(dataframe, start, end):
         dataframe[f"{start}_to_{end-1}_years"] = dataframe[age_cols].sum(axis=1)
     dataframe = dataframe.drop(columns=age_cols)
     return dataframe
+
+def set_new_header(df, keyword):
+    col_names = df.copy().columns.tolist()
+
+    header_idx = df.index[df[col_names[0]] == keyword][0]
+    new_header = df.iloc[header_idx].tolist()
+
+    df = df.iloc[header_idx + 1:, ].reset_index(drop=True)
+    df.columns = new_header
+    return df
