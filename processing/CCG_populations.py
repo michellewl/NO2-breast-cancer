@@ -6,10 +6,6 @@ import pandas as pd
 folder = "..\\data\\CCG_populations\\"
 filepaths = glob(f"{folder}*.xls*")
 
-# pattern = re.compile(r'\d\d\d\d')
-# years = [pattern.findall(file)[0] for file in filepaths]
-# print(years)
-
 recent_years = []
 for file in filepaths:
     if "2002" in file:
@@ -66,29 +62,37 @@ def get_area_df(dataframe, area, sub_area=False):
 
     return dataframe.iloc[idx_start:idx_end]
 
-
-# ldn_idx_start = value_index(df, "Area Name", "London")
-# area_names = df["Area Name"].copy().dropna().tolist()
-#
-# ldn_idx_end = value_index(df, "Area Name", area_names[area_names.index("London")+1])
-# # print(ldn_idx_start, ldn_idx_end)
-# #
-# # print(df.iloc[ldn_idx_start:ldn_idx_end])
-#
 col_names = df.copy().columns.tolist()
-#
-# sub_area_col = col_names[col_names.index("Area Name")+1]
-# sub_area_names = df[sub_area_col].copy().dropna().tolist()
-#
-# sub_area_idx_start = value_index(df, sub_area_col, "London")
-# sub_area_idx_end = value_index(df, sub_area_col, sub_area_names[sub_area_names.index("London")+1])
-#
-# print(ldn_idx_end, sub_area_idx_end)
 
 london_df = get_area_df(df, "London", "London")
 
 ccg_col = col_names[col_names.index("Area Name")+2]
 
 london_ccg_df = london_df.loc[london_df[ccg_col].notna()].drop(columns=["Area Name", col_names[col_names.index("Area Name")+1]])
-london_ccg_df.rename(columns= {ccg_col:"CCG"},inplace=True)
+london_ccg_df.rename(columns= {ccg_col:"CCG", "90+":90},inplace=True)
+
+def group_ages(dataframe, start, end):
+    """
+    Function to aggregate age groups.
+    :param dataframe: Pandas dataframe object.
+    :param start: Start age (inclusive).
+    :param end: End age (exclusive).
+    :return: Pandas dataframe object with grouped ages.
+    """
+    age_cols = list(range(start, end))
+
+    if start==0:
+        dataframe[f"below_{end}_years"] = dataframe[age_cols].sum(axis=1)
+    elif end == 91:
+        dataframe[f"above_{start-1}_years"] = dataframe[age_cols].sum(axis=1)
+    else:
+        dataframe[f"{start}_to_{end-1}_years"] = dataframe[age_cols].sum(axis=1)
+    dataframe = dataframe.drop(columns=age_cols)
+    return dataframe
+
+
+london_ccg_df = group_ages(london_ccg_df, 0, 40)
+london_ccg_df = group_ages(london_ccg_df, 40, 71)
+london_ccg_df = group_ages(london_ccg_df, 71, 91)
+
 print(london_ccg_df.columns)
