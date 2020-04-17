@@ -20,17 +20,20 @@ def load_df_from_xlsheet(filename, sheet_name_pattern):
 
     return pd.read_excel(filename, required_sheet)
 
-def value_index(dataframe, column_name, value):
+def value_index(dataframe, column, value):
     """
     Obtains row index of a value in a dataframe, given the column name.
     :param dataframe: Pandas dataframe object.
-    :param column_name: Name of column in dataframe.
+    :param column: Name or index of column in dataframe.
     :param value: Value of interest.
     :return: Integer index.
     """
-    return dataframe.loc[dataframe[column_name]==value].index[0]
+    if isinstance(column, str):
+        return dataframe.loc[dataframe[column] == value].index[0]
+    elif isinstance(column, int):
+        return dataframe.loc[dataframe.iloc[:, column] == value].index[0]
 
-def get_area_df(dataframe, area, sub_area=False):
+def get_area_df(dataframe, area_col, area, sub_area=False):
     """
     Function to subset the full dataframe by area and/or sub-area.
     :param dataframe: Pandas dataframe object.
@@ -38,16 +41,25 @@ def get_area_df(dataframe, area, sub_area=False):
     :param sub_area: String object of sub-setted geographical area to choose. Optional. e.g. Lancashire
     :return: Pandas dataframe object of chosen geographical subset.
     """
-    area_idx_start = value_index(dataframe, "Area Name", area)
-    area_names = dataframe["Area Name"].copy().dropna().tolist()
-    area_idx_end = value_index(dataframe, "Area Name", area_names[area_names.index(area)+1])
+    area_idx_start = value_index(dataframe, area_col, area)
+    if isinstance(area_col, str):
+        area_names = dataframe[area_col].copy().dropna().tolist()
+    elif isinstance(area_col, int):
+        area_names = dataframe.iloc[:, area_col].copy().dropna().tolist()
+    area_idx_end = value_index(dataframe, area_col, area_names[area_names.index(area)+1])
 
     if sub_area:
         col_names = dataframe.copy().columns.tolist()
-        col = col_names[col_names.index("Area Name") + 1]
-        names = dataframe[col].copy().dropna().tolist()
-        sub_idx_start = value_index(dataframe, col, area)
-        sub_idx_end = value_index(dataframe, col, names[names.index(area)+1])
+
+        if isinstance(area_col, str):
+            col = col_names[col_names.index(area_col) + 1]
+            names = dataframe[col].copy().dropna().tolist()
+        elif isinstance(area_col, int):
+            col = area_col + 1
+            names = dataframe.iloc[:, col].copy().dropna().tolist()
+        sub_idx_start = value_index(dataframe, col, sub_area)
+        sub_idx_end = value_index(dataframe, col, names[names.index(sub_area) + 1])
+
     else:
         sub_idx_start = area_idx_start
         sub_idx_end = area_idx_end

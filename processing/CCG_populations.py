@@ -36,4 +36,8 @@ for file in filepaths:
 # Dealing with 2012 onwards (data files have same formatting).
 df = fn.load_df_from_xlsheet(years_2012_to_18[0], re.compile(r"\wemale"))
 df = fn.set_new_header(df, "Area Codes ")
-print(df.head())
+col_names = df.copy().columns.tolist()
+#print(col_names)
+london_df = fn.get_area_df(df, 1, "London", "NHS England London")
+print(london_df)
+
