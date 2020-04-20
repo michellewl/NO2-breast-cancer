@@ -3,4 +3,6 @@
 *.xlsx
 .idea/
 *__pycache__/
+/data/LAQN/*.ipynb
+/data/LAQN/.ipynb_checkpoints/
 
