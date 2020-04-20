@@ -107,3 +107,22 @@ def set_new_header(df, keyword):
     df = df.iloc[header_idx + 1:, ].reset_index(drop=True)
     df.columns = new_header
     return df
+
+def get_sheet_names_from_xlfile(filename, pattern=False):
+    """
+    Function to print sheet names in an Excel file.
+    :param filename: String object indicating path to Excel file.
+    :param pattern: re compiler object (optional) to specify sheet name pattern.
+    :return: List of sheet names as string objects.
+    """
+
+    workbook = xlrd.open_workbook(filename)
+    sheets = workbook.sheet_names()
+    if pattern:
+        required_sheets = []
+        for sheet in sheets:
+            if pattern.findall(sheet):
+                required_sheets.append(sheet)
+        return required_sheets
+    else:
+        return sheets
