@@ -65,6 +65,9 @@ if year=="2012-18" or year=="all":
         #print(f"{london_ccg_df.head(2)}")
 
 # Dealing with 2002-2010 (different formatting)
-required_sheets = fn.get_sheet_names_from_xlfile(years_2002_to_10[0], re.compile(r"20\d\d"))
+filename = years_2002_to_10[0]
+required_sheets = fn.get_sheet_names_from_xlfile(filename, re.compile(r"20\d\d"))
 required_sheets.remove("Mid-2011")
-print(required_sheets)
+
+df = fn.load_df_from_xlsheet(filename, required_sheets[0])
+print(df.head)
