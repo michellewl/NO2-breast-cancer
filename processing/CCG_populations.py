@@ -35,12 +35,13 @@ if year == "2011" or year == "all":
 
     ccg_col = col_names[col_names.index("Area Name")+2]
     london_ccg_df = london_df.loc[london_df[ccg_col].notna()].drop(columns=["Area Name", col_names[col_names.index("Area Name")+1]])
-    london_ccg_df.rename(columns= {ccg_col:"CCG", "90+":90},inplace=True)
+    london_ccg_df.rename(columns= {"Area Code":"area_code", "All Ages":"all_ages", ccg_col:"ccg", "90+":90},inplace=True)
     london_ccg_df = fn.group_ages(london_ccg_df, 0, 40)
     london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
     london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
     print(f"Filename: {year_2011[0]}\nNumber of CCGs: {len(london_ccg_df)}")
     #print(f"{london_ccg_df.head(2)}")
+    #print(london_ccg_df.columns)
 
 # Dealing with 2012 onwards (data files have same formatting).
 if year=="2012-18" or year=="all":
@@ -57,12 +58,13 @@ if year=="2012-18" or year=="all":
 
         ccg_col = "Area Names"
         london_ccg_df = london_df.loc[london_df[ccg_col].notna()].drop(columns=["Unknown1", "Unknown2"])
-        london_ccg_df.rename(columns= {ccg_col:"CCG", "90+":90},inplace=True)
+        london_ccg_df.rename(columns= {"Area Codes ":"area_code", "All Ages":"all_ages", ccg_col:"ccg", "90+":90},inplace=True)
         london_ccg_df = fn.group_ages(london_ccg_df, 0, 40)
         london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
         london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
         print(f"Filename: {years_2012_to_18[i]}\nNumber of CCGs: {len(london_ccg_df)}")
         #print(f"{london_ccg_df.head(2)}")
+        #print(london_ccg_df.columns)
 
 # Dealing with 2002-2010 (different formatting)
 if year == "2002-10" or year == "all":
@@ -96,11 +98,13 @@ if year == "2002-10" or year == "all":
                 rename_dict.update({column:int(column.replace("f", ""))})
         rename_dict.update({"f90plus" : 90})
         london_ccg_df.rename(columns= rename_dict,inplace=True)
+        london_ccg_df.rename(columns={"Area_Code":"area_code", "Area_Name":"ccg"}, inplace=True)
 
         london_ccg_df = fn.group_ages(london_ccg_df, 0, 40)
         london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
         london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
         print(f"Sheet: {required_sheets[i]}\nNumber of CCGs: {len(london_ccg_df)}")
+        print(london_ccg_df.columns)
 
 
 

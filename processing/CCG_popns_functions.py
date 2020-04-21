@@ -87,11 +87,11 @@ def group_ages(dataframe, start, end):
     age_cols = list(range(start, end))
 
     if start==0:
-        dataframe[f"below_{end}_years"] = dataframe[age_cols].sum(axis=1)
+        dataframe[f"below_age_{end}"] = dataframe[age_cols].sum(axis=1)
     elif end == 91:
-        dataframe[f"above_{start-1}_years"] = dataframe[age_cols].sum(axis=1)
+        dataframe[f"above_age_{start-1}"] = dataframe[age_cols].sum(axis=1)
     else:
-        dataframe[f"{start}_to_{end-1}_years"] = dataframe[age_cols].sum(axis=1)
+        dataframe[f"age_{start}_to_{end-1}"] = dataframe[age_cols].sum(axis=1)
     dataframe = dataframe.drop(columns=age_cols)
     return dataframe
 
