@@ -129,3 +129,11 @@ def get_sheet_names_from_xlfile(filename, pattern=False):
         return required_sheets
     else:
         return sheets
+
+def rename_age_cols_with_year(df, year):
+
+    rename_dict = {}
+    for column in df.columns:
+        if re.compile("age").findall(column):
+            rename_dict.update({column:f"{year}_{column}"})
+    return df.rename(columns=rename_dict)

@@ -27,8 +27,9 @@ for file in filepaths:
 
 # Dealing with 2011 (data has different formatting).
 if year == "2011" or year == "all":
-
-    df = fn.load_df_from_xlsheet(year_2011[0], re.compile(r"\wemale"))
+    filename = year_2011[0]
+    year = re.compile(r"\d\d\d\d").findall(filename)[0]
+    df = fn.load_df_from_xlsheet(filename, re.compile(r"\wemale"))
     col_names = df.copy().columns.tolist()
 
     london_df = fn.get_area_df(df, "Area Name", "London", "London")
@@ -39,15 +40,19 @@ if year == "2011" or year == "all":
     london_ccg_df = fn.group_ages(london_ccg_df, 0, 40)
     london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
     london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
-    print(f"Filename: {year_2011[0]}\nNumber of CCGs: {len(london_ccg_df)}")
-    #print(f"{london_ccg_df.head(2)}")
-    #print(london_ccg_df.columns)
+
+    london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, "2011")
+    print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
+    # print(f"{london_ccg_df.head(2)}")
+    # print(london_ccg_df.columns)
 
 # Dealing with 2012 onwards (data files have same formatting).
 if year=="2012-18" or year=="all":
     for i in range(len(years_2012_to_18)):
+        filename = years_2012_to_18[i]
+        year = re.compile(r"\d\d\d\d").findall(filename)[0]
 
-        df = fn.load_df_from_xlsheet(years_2012_to_18[i], re.compile(r"\wemale"))
+        df = fn.load_df_from_xlsheet(filename, re.compile(r"\wemale"))
         df = fn.set_new_header(df, "Area Codes ")
         col_names = df.copy().columns.tolist()
         london_df = fn.get_area_df(df, 1, "London", "NHS England London")
@@ -62,9 +67,10 @@ if year=="2012-18" or year=="all":
         london_ccg_df = fn.group_ages(london_ccg_df, 0, 40)
         london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
         london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
-        print(f"Filename: {years_2012_to_18[i]}\nNumber of CCGs: {len(london_ccg_df)}")
+        london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, year)
+        print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
         #print(f"{london_ccg_df.head(2)}")
-        #print(london_ccg_df.columns)
+        print(london_ccg_df.columns)
 
 # Dealing with 2002-2010 (different formatting)
 if year == "2002-10" or year == "all":
@@ -82,6 +88,7 @@ if year == "2002-10" or year == "all":
     required_sheets.remove("Mid-2011")
 
     for i in range(len(required_sheets)):
+        year = re.compile(r"\d\d\d\d").findall(required_sheets[i])[0]
         df = fn.load_df_from_xlsheet(filename, required_sheets[i])
 
         male_cols = []
@@ -104,9 +111,9 @@ if year == "2002-10" or year == "all":
         london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
         london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
         london_ccg_df["all_ages"] = london_ccg_df.below_age_40 + london_ccg_df.age_40_to_70 + london_ccg_df.above_age_70
-
+        london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, year)
         print(f"Sheet: {required_sheets[i]}\nNumber of CCGs: {len(london_ccg_df)}")
-        print(london_ccg_df.head(2))
+        #print(london_ccg_df.head(2))
         #print(london_ccg_df.columns)
 
 
