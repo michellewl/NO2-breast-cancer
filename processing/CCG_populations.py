@@ -65,22 +65,42 @@ if year=="2012-18" or year=="all":
         #print(f"{london_ccg_df.head(2)}")
 
 # Dealing with 2002-2010 (different formatting)
-# Get London area codes
-df = fn.load_df_from_xlsheet(year_2011[0], re.compile(r"\wemale"))
-london_df = fn.get_area_df(df, "Area Name", "London", "London")
-area_codes = london_df["Area Code"].dropna().tolist()
+if year == "2002-10" or year == "all":
+    print(f"Filename: {years_2002_to_10}")
 
-filename = years_2002_to_10[0]
-required_sheets = fn.get_sheet_names_from_xlfile(filename, re.compile(r"20\d\d"))
-required_sheets.remove("Mid-2011")
+    # Get London area codes
+    df = fn.load_df_from_xlsheet(year_2011[0], re.compile(r"\wemale"))
+    london_df = fn.get_area_df(df, "Area Name", "London", "London")
+    area_codes = london_df["Area Code"].dropna().tolist()
+    del area_codes[0]
 
-df = fn.load_df_from_xlsheet(filename, required_sheets[0])
+    # Load 2002 data
+    filename = years_2002_to_10[0]
+    required_sheets = fn.get_sheet_names_from_xlfile(filename, re.compile(r"20\d\d"))
+    required_sheets.remove("Mid-2011")
 
-male_cols = []
-for column in df.columns:
-    if re.compile(r"m\w+").match(column):
-        male_cols.append(column)
-df = df.drop(columns=male_cols).drop(columns="all_ages")
+    for i in range(len(required_sheets)):
+        df = fn.load_df_from_xlsheet(filename, required_sheets[i])
 
-london_ccg_df =  df[df['Area_Code'].isin(area_codes)]
+        male_cols = []
+        for column in df.columns:
+            if re.compile(r"m\w+").match(column):
+                male_cols.append(column)
+        df = df.drop(columns=male_cols).drop(columns="all_ages")
+
+        london_ccg_df =  df[df['Area_Code'].isin(area_codes)].copy()
+
+        rename_dict = {}
+        for column in london_ccg_df.columns:
+            if re.compile(r"f\d+$").findall(column):
+                rename_dict.update({column:int(column.replace("f", ""))})
+        rename_dict.update({"f90plus" : 90})
+        london_ccg_df.rename(columns= rename_dict,inplace=True)
+
+        london_ccg_df = fn.group_ages(london_ccg_df, 0, 40)
+        london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
+        london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
+        print(f"Sheet: {required_sheets[i]}\nNumber of CCGs: {len(london_ccg_df)}")
+
+
 
