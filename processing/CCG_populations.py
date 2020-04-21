@@ -9,7 +9,7 @@ filepaths = glob(f"{folder}*.xls*")
 
 #year = "all"
 year = "2002-10"
-year = "2011"
+#year = "2011"
 #year = "2012-18"
 
 # Separately process files with different formatting.
@@ -65,6 +65,11 @@ if year=="2012-18" or year=="all":
         #print(f"{london_ccg_df.head(2)}")
 
 # Dealing with 2002-2010 (different formatting)
+# Get London area codes
+df = fn.load_df_from_xlsheet(year_2011[0], re.compile(r"\wemale"))
+london_df = fn.get_area_df(df, "Area Name", "London", "London")
+area_codes = london_df["Area Code"].dropna().tolist()
+
 filename = years_2002_to_10[0]
 required_sheets = fn.get_sheet_names_from_xlfile(filename, re.compile(r"20\d\d"))
 required_sheets.remove("Mid-2011")
@@ -76,3 +81,6 @@ for column in df.columns:
     if re.compile(r"m\w+").match(column):
         male_cols.append(column)
 df = df.drop(columns=male_cols).drop(columns="all_ages")
+
+london_ccg_df =  df[df['Area_Code'].isin(area_codes)]
+
