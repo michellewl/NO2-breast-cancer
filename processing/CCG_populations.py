@@ -9,7 +9,7 @@ filepaths = glob(f"{folder}*.xls*")
 
 #year = "all"
 year = "2002-10"
-#year = "2011"
+year = "2011"
 #year = "2012-18"
 
 # Separately process files with different formatting.
@@ -70,4 +70,9 @@ required_sheets = fn.get_sheet_names_from_xlfile(filename, re.compile(r"20\d\d")
 required_sheets.remove("Mid-2011")
 
 df = fn.load_df_from_xlsheet(filename, required_sheets[0])
-print(df.head)
+
+male_cols = []
+for column in df.columns:
+    if re.compile(r"m\w+").match(column):
+        male_cols.append(column)
+df = df.drop(columns=male_cols).drop(columns="all_ages")
