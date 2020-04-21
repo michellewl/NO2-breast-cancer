@@ -7,10 +7,10 @@ import CCG_popns_functions as fn
 folder = "..\\data\\CCG_populations\\"
 filepaths = glob(f"{folder}*.xls*")
 
-#year = "all"
-year = "2002-10"
-#year = "2011"
-#year = "2012-18"
+process_year = "all"
+#process_year = "2002-10"
+#process_year = "2011"
+#process_year = "2012-18"
 
 # Separately process files with different formatting.
 
@@ -28,7 +28,7 @@ for file in filepaths:
 full_df = pd.DataFrame()
 
 # Dealing with 2002-2010 (different formatting)
-if year == "2002-10" or year == "all":
+if process_year == "2002-10" or process_year == "all":
     print(f"Filename: {years_2002_to_10}")
 
     # Get London area codes
@@ -75,10 +75,10 @@ if year == "2002-10" or year == "all":
         if full_df.empty:
             full_df = london_ccg_df.copy()
         else:
-            full_df.join(london_ccg_df, how="left")
+            full_df = full_df.join(london_ccg_df.copy(), how="left")
 
 # Dealing with 2011 (data has different formatting).
-if year == "2011" or year == "all":
+if process_year == "2011" or process_year == "all":
     filename = year_2011[0]
     year = re.compile(r"\d\d\d\d").findall(filename)[0]
     df = fn.load_df_from_xlsheet(filename, re.compile(r"\wemale"))
@@ -101,10 +101,10 @@ if year == "2011" or year == "all":
     if full_df.empty:
         full_df = london_ccg_df.copy()
     else:
-        full_df.join(london_ccg_df, how="left")
+        full_df = full_df.join(london_ccg_df.copy(), how="left")
 
 # Dealing with 2012 onwards (data files have same formatting).
-if year=="2012-18" or year=="all":
+if process_year=="2012-18" or process_year=="all":
     for i in range(len(years_2012_to_18)):
         filename = years_2012_to_18[i]
         year = re.compile(r"\d\d\d\d").findall(filename)[0]
@@ -132,9 +132,10 @@ if year=="2012-18" or year=="all":
         if full_df.empty:
             full_df = london_ccg_df.copy()
         else:
-            full_df.join(london_ccg_df, how="left")
+            full_df = full_df.join(london_ccg_df.copy(), how="left")
 
 print(full_df.columns)
 
 
-
+full_df.to_csv(f"{folder}london_all_years.csv")
+print("Saved as .csv file.")
