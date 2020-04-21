@@ -103,8 +103,11 @@ if year == "2002-10" or year == "all":
         london_ccg_df = fn.group_ages(london_ccg_df, 0, 40)
         london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
         london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
+        london_ccg_df["all_ages"] = london_ccg_df.below_age_40 + london_ccg_df.age_40_to_70 + london_ccg_df.above_age_70
+
         print(f"Sheet: {required_sheets[i]}\nNumber of CCGs: {len(london_ccg_df)}")
-        print(london_ccg_df.columns)
+        print(london_ccg_df.head(2))
+        #print(london_ccg_df.columns)
 
 
 
