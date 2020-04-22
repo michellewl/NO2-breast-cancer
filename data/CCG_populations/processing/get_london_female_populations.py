@@ -1,15 +1,9 @@
-from glob import glob
 import re
-import xlrd
 import pandas as pd
 import functions as fn
-from pathlib import Path
 import os
 
 folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-#print(dir_path)
-#folder = Path(f"{dir_path}/../")
-#filepaths = glob(f"{folder}/*.xls*")
 filepaths = [f for f in os.listdir(folder) if '.xls' in f.lower()]
 
 process_year = "all"

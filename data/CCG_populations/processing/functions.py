@@ -1,4 +1,3 @@
-from glob import glob
 import re
 import xlrd
 import pandas as pd
