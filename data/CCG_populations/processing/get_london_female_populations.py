@@ -2,9 +2,9 @@ from glob import glob
 import re
 import xlrd
 import pandas as pd
-import CCG_popns_functions as fn
+import functions as fn
 
-folder = "..\\data\\CCG_populations\\"
+folder = "..\\"
 filepaths = glob(f"{folder}*.xls*")
 
 process_year = "all"
