@@ -3,8 +3,8 @@ import pandas as pd
 import functions as fn
 import os
 
-folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-filepaths = [f for f in os.listdir(folder) if '.xls' in f.lower()]
+folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) # folder where data is downloaded
+filepaths = [f for f in os.listdir(folder) if '.xls' in f.lower()] # lists filepaths for all Excel files (case-insensitive)
 
 process_year = "all"
 #process_year = "2002-10"
