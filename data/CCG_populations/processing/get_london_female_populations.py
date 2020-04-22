@@ -3,9 +3,13 @@ import re
 import xlrd
 import pandas as pd
 import functions as fn
+from pathlib import Path
+import os
 
-folder = "..\\"
-filepaths = glob(f"{folder}*.xls*")
+folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+#print(dir_path)
+#folder = Path(f"{dir_path}/../")
+filepaths = glob(f"{folder}/*.xls*")
 
 process_year = "all"
 #process_year = "2002-10"
@@ -52,7 +56,7 @@ if process_year == "2002-10" or process_year == "all":
                 male_cols.append(column)
         df = df.drop(columns=male_cols).drop(columns="all_ages")
 
-        london_ccg_df =  df[df['Area_Code'].isin(area_codes)].copy()
+        london_ccg_df = df[df['Area_Code'].isin(area_codes)].copy()
 
         rename_dict = {}
         for column in london_ccg_df.columns:
