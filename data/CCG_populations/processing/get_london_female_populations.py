@@ -4,7 +4,7 @@ import functions as fn
 import os
 
 folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) # folder where data is downloaded
-filepaths = [f for f in os.listdir(folder) if '.xls' in f.lower()] # lists filepaths for all Excel files (case-insensitive)
+filepaths = [os.path.join(folder, f) for f in os.listdir(folder) if '.xls' in f.lower()] # lists filepaths for all Excel files (case-insensitive)
 
 process_year = "all"
 #process_year = "2002-10"
@@ -18,11 +18,11 @@ year_2011 = []
 years_2012_to_18 = []
 for file in filepaths:
     if "2002" in file:
-        years_2002_to_10.append(os.path.join(folder,file))
+        years_2002_to_10.append(file)
     elif "2011" in file:
-        year_2011.append(os.path.join(folder,file))
+        year_2011.append(file)
     else:
-        years_2012_to_18.append(os.path.join(folder,file))
+        years_2012_to_18.append(file)
 
 full_df = pd.DataFrame()
 
@@ -70,12 +70,12 @@ if process_year == "2002-10" or process_year == "all":
         print(f"Sheet: {required_sheets[i]}\nNumber of CCGs: {len(london_ccg_df)}")
         print(london_ccg_df.head(2))
         #print(london_ccg_df.columns)
-        london_ccg_df.set_index(keys = ["area_code", "ccg"], inplace=True)
+        london_ccg_df.set_index(keys = ["area_code"], inplace=True)
 
         if full_df.empty:
             full_df = london_ccg_df.copy()
         else:
-            full_df = full_df.join(london_ccg_df.copy(), how="left")
+            full_df = full_df.join(london_ccg_df.copy().drop(columns="ccg"), how="left")
 
 # Dealing with 2011 (data has different formatting).
 if process_year == "2011" or process_year == "all":
@@ -97,11 +97,11 @@ if process_year == "2011" or process_year == "all":
     print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
     print(f"{london_ccg_df.head(2)}")
     # print(london_ccg_df.columns)
-    london_ccg_df.set_index(keys=["area_code", "ccg"], inplace=True)
+    london_ccg_df.set_index(keys=["area_code"], inplace=True)
     if full_df.empty:
         full_df = london_ccg_df.copy()
     else:
-        full_df = full_df.join(london_ccg_df.copy(), how="left")
+        full_df = full_df.join(london_ccg_df.copy().drop(columns="ccg"), how="left")
 
 # Dealing with 2012 onwards (data files have same formatting).
 if process_year=="2012-18" or process_year=="all":
@@ -128,14 +128,13 @@ if process_year=="2012-18" or process_year=="all":
         print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
         print(f"{london_ccg_df.head(2)}")
         #print(london_ccg_df.columns)
-        london_ccg_df.set_index(keys = ["area_code", "ccg"], inplace=True)
+        london_ccg_df.set_index(keys = ["area_code"], inplace=True)
         if full_df.empty:
             full_df = london_ccg_df.copy()
         else:
-            full_df = full_df.join(london_ccg_df.copy(), how="left")
+            full_df = full_df.join(london_ccg_df.copy().drop(columns="ccg"), how="left")
 
-# print(full_df.columns)
-#
-#
-# full_df.to_csv(f"{folder}london_all_years.csv")
-# print("Saved as .csv file.")
+print(full_df.head(2))
+
+full_df.to_csv(os.path.join(folder, "london_all_years.csv"))
+print("Saved as .csv file.")
