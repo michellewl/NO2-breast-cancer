@@ -18,11 +18,11 @@ year_2011 = []
 years_2012_to_18 = []
 for file in filepaths:
     if "2002" in file:
-        years_2002_to_10.append(file)
+        years_2002_to_10.append(os.path.join(folder,file))
     elif "2011" in file:
-        year_2011.append(file)
+        year_2011.append(os.path.join(folder,file))
     else:
-        years_2012_to_18.append(file)
+        years_2012_to_18.append(os.path.join(folder,file))
 
 full_df = pd.DataFrame()
 
@@ -68,7 +68,7 @@ if process_year == "2002-10" or process_year == "all":
         london_ccg_df["all_ages"] = london_ccg_df.below_age_40 + london_ccg_df.age_40_to_70 + london_ccg_df.above_age_70
         london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, year)
         print(f"Sheet: {required_sheets[i]}\nNumber of CCGs: {len(london_ccg_df)}")
-        #print(london_ccg_df.head(2))
+        print(london_ccg_df.head(2))
         #print(london_ccg_df.columns)
         london_ccg_df.set_index(keys = ["area_code", "ccg"], inplace=True)
 
@@ -95,7 +95,7 @@ if process_year == "2011" or process_year == "all":
 
     london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, "2011")
     print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
-    # print(f"{london_ccg_df.head(2)}")
+    print(f"{london_ccg_df.head(2)}")
     # print(london_ccg_df.columns)
     london_ccg_df.set_index(keys=["area_code", "ccg"], inplace=True)
     if full_df.empty:
@@ -126,7 +126,7 @@ if process_year=="2012-18" or process_year=="all":
         london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
         london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, year)
         print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
-        #print(f"{london_ccg_df.head(2)}")
+        print(f"{london_ccg_df.head(2)}")
         #print(london_ccg_df.columns)
         london_ccg_df.set_index(keys = ["area_code", "ccg"], inplace=True)
         if full_df.empty:
@@ -134,8 +134,8 @@ if process_year=="2012-18" or process_year=="all":
         else:
             full_df = full_df.join(london_ccg_df.copy(), how="left")
 
-print(full_df.columns)
-
-
-full_df.to_csv(f"{folder}london_all_years.csv")
-print("Saved as .csv file.")
+# print(full_df.columns)
+#
+#
+# full_df.to_csv(f"{folder}london_all_years.csv")
+# print("Saved as .csv file.")
