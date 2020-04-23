@@ -45,10 +45,11 @@ if process_year == "2002-10" or process_year == "all":
         year = re.compile(r"\d\d\d\d").findall(required_sheets[i])[0]
         df = fn.load_df_from_xlsheet(filename, required_sheets[i])
 
-        male_cols = []
-        for column in df.columns:
-            if re.compile(r"m\w+").match(column):
-                male_cols.append(column)
+        # male_cols = []
+        # for column in df.columns:
+        #     if re.compile(r"m\w+").match(column):
+        #         male_cols.append(column)
+        male_cols = [column for column in df.columns if re.compile(r"m\w+").match(column)]
         df = df.drop(columns=male_cols).drop(columns="all_ages")
 
         london_ccg_df = df[df['Area_Code'].isin(area_codes)].copy()
