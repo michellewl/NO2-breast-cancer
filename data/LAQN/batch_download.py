@@ -5,8 +5,7 @@ import json
 import pandas as pd
 import os
 
-
-batch = 2
+batch = 3
 num_batches = 10
 
 SpeciesCode = "NO2"
