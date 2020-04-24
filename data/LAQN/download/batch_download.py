@@ -5,7 +5,7 @@ import json
 import pandas as pd
 import os
 
-batch = 5
+batch = 9
 num_batches = 10
 
 SpeciesCode = "NO2"
@@ -48,7 +48,7 @@ for SiteCode in all_site_codes[start_batch:end_batch]:
 if problem_sites:
     print(f"Unable to join sites: {problem_sites}")
 
-folder = os.path.dirname(os.path.realpath(__file__))
+folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 save_filepath = os.path.join(folder, f"NO2_2002-18_batch{batch}.csv")
 no2_df.to_csv(save_filepath)
 print(f"\nSaved batch {batch} to csv.")
