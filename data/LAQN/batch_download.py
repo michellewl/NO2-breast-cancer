@@ -5,24 +5,22 @@ import json
 import pandas as pd
 import os
 
-# API for LAQN data is "/Data/Site/Wide/SiteCode={SiteCode}/StartDate={StartDate}/EndDate={EndDate}/csv"
-# This returns raw data based on 'SiteCode', 'StartDate', 'EndDate'.
+
+batch = 2
+num_batches = 10
+
+SpeciesCode = "NO2"
+StartDate = "2002-01-01"
+EndDate = "2018-01-01"
+
 # Default time period is 'hourly'.
 # Data returned in CSV format
 
 london_sites = requests.get("http://api.erg.kcl.ac.uk/AirQuality/Information/MonitoringSites/GroupName=London/Json")
 london_sites_df = pd.DataFrame(london_sites.json()['Sites']['Site'])
 all_site_codes = london_sites_df["@SiteCode"].tolist()
-#london_sites.content
 print(f"{len(all_site_codes)} sites in total.")
 
-SpeciesCode = "NO2"
-StartDate = "2002-01-01"
-EndDate = "2018-01-01"
-
-num_batches = 10
-batch = 1
-#for batch in range(num_batches):
 print(f"\nBatch {batch}.")
 no2_df = pd.DataFrame()
 problem_sites = []
