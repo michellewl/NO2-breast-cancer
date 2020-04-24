@@ -8,7 +8,9 @@ import seaborn as sns
 sns.set(style="darkgrid")
 import numpy as np
 
-folder = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "CCG_populations") # folder where data is saved
+print("Saving plots to:")
+
+folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) # folder where data is saved
 filename = [file for file in os.listdir(folder) if ".csv" in file][0]
 
 df = pd.read_csv(os.path.join(folder, filename), index_col=["area_code", "ccg"])
@@ -33,3 +35,4 @@ for group in age_groupings:
 
     plot_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), f"CCG_fpopulation_{group}.png")
     g.savefig(plot_filename)
+    print(plot_filename)
