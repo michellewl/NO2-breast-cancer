@@ -29,6 +29,7 @@ EndDate = "2018-01-01"
 # print(single_site)
 
 no2_df = pd.DataFrame()
+problem_sites = []
 
 for SiteCode in all_site_codes:
     print(f"\nWorking on site {SiteCode}. ({all_site_codes.index(SiteCode)} of {len(all_site_codes)})")
@@ -44,6 +45,10 @@ for SiteCode in all_site_codes:
         break
     except:
         print(f"Unable to join site {SiteCode} to dataframe.")
+        problem_sites.append()
+
+if problem_sites:
+    print(f"Unable to join sites: {problem_sites}")
 
 folder = os.path.dirname(os.path.realpath(__file__))
 save_filepath = os.path.join(folder, "NO2_2002-18.csv")
