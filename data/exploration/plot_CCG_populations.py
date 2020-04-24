@@ -29,4 +29,7 @@ for group in age_groupings:
     g = sns.relplot(x="year", y="population", hue="ccg", kind="line", data=plot_df, legend=False, height=5, aspect=3)
     group_name = group.replace("_", " ")
     g.fig.suptitle(f"Female population ({group_name}) of London CCGs")
-    plt.show()
+    #plt.show()
+
+    plot_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), f"CCG_fpopulation_{group}.png")
+    g.savefig(plot_filename)
