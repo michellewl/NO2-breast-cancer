@@ -6,4 +6,5 @@
 /data/LAQN/*.ipynb
 /data/LAQN/.ipynb_checkpoints/
 *.csv
+*.png
 
