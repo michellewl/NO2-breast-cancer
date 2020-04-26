@@ -1,1 +1,1 @@
-NO2 data for London. Download from LondonAir.org or in R using the openair library.
+NO2 data for London. Downloaded using the Kings College London API (see scripts in the download folder).
