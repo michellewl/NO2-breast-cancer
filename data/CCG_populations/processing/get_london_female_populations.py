@@ -11,6 +11,7 @@ process_year = "all"
 #process_year = "2002-10"
 #process_year = "2011"
 #process_year = "2012-18"
+print(f"Processing {process_year} years...")
 
 # Separately process files with different formatting.
 
@@ -24,12 +25,13 @@ for file in filepaths:
         year_2011.append(file)
     else:
         years_2012_to_18.append(file)
+years_2012_to_18.sort()
 
 full_df = pd.DataFrame()
 
 # Dealing with 2002-2010 (different formatting)
 if process_year == "2002-10" or process_year == "all":
-    print(f"Filename: {years_2002_to_10}")
+    #print(f"Filename: {years_2002_to_10}")
 
     # Get London area codes
     df = fn.load_df_from_xlsheet(year_2011[0], re.compile(r"\wemale"))
@@ -40,16 +42,12 @@ if process_year == "2002-10" or process_year == "all":
     # Load 2002 data
     filename = years_2002_to_10[0]
     required_sheets = fn.get_sheet_names_from_xlfile(filename, re.compile(r"20\d\d"))
+    required_sheets.sort()
     required_sheets.remove("Mid-2011")
 
     for i in range(len(required_sheets)):
         year = re.compile(r"\d\d\d\d").findall(required_sheets[i])[0]
         df = fn.load_df_from_xlsheet(filename, required_sheets[i])
-
-        # male_cols = []
-        # for column in df.columns:
-        #     if re.compile(r"m\w+").match(column):
-        #         male_cols.append(column)
         male_cols = [column for column in df.columns if re.compile(r"m\w+").match(column)]
         df = df.drop(columns=male_cols).drop(columns="all_ages")
 
@@ -68,8 +66,8 @@ if process_year == "2002-10" or process_year == "all":
         london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
         london_ccg_df["all_ages"] = london_ccg_df.below_age_40 + london_ccg_df.age_40_to_70 + london_ccg_df.above_age_70
         london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, year)
-        print(f"Sheet: {required_sheets[i]}\nNumber of CCGs: {len(london_ccg_df)}")
-        print(london_ccg_df.head(2))
+        # print(f"Sheet: {required_sheets[i]}\nNumber of CCGs: {len(london_ccg_df)}")
+        # print(london_ccg_df.head(2))
         #print(london_ccg_df.columns)
         london_ccg_df.set_index(keys = ["area_code"], inplace=True)
 
@@ -95,8 +93,8 @@ if process_year == "2011" or process_year == "all":
     london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
 
     london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, "2011")
-    print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
-    print(f"{london_ccg_df.head(2)}")
+    # print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
+    # print(f"{london_ccg_df.head(2)}")
     # print(london_ccg_df.columns)
     london_ccg_df.set_index(keys=["area_code"], inplace=True)
     if full_df.empty:
@@ -126,8 +124,8 @@ if process_year=="2012-18" or process_year=="all":
         london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
         london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
         london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, year)
-        print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
-        print(f"{london_ccg_df.head(2)}")
+        # print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
+        # print(f"{london_ccg_df.head(2)}")
         #print(london_ccg_df.columns)
         london_ccg_df.set_index(keys = ["area_code"], inplace=True)
         if full_df.empty:
@@ -147,6 +145,7 @@ for group in age_groupings:
     grouped_ages_df.columns = [int(col.replace(f"_{group}","")) for col in grouped_ages_df.columns]
 
     plot_df = pd.DataFrame(np.repeat(grouped_ages_df.columns.tolist(), len(df)), columns=["year"])
+    plot_df["area_code"] = df.index.levels[0].tolist()*len(grouped_ages_df.columns)
     plot_df["ccg"] = df.index.levels[1].tolist()*len(grouped_ages_df.columns)
     plot_df = plot_df.sort_values(["ccg", "year"])
     plot_df["population"] = np.array([grouped_ages_df.loc[grouped_ages_df.index.levels[1] == ccg].values[0]
@@ -158,6 +157,7 @@ for group in age_groupings:
         full_df = plot_df.copy()
     else:
         full_df = pd.concat([full_df, plot_df])
+
 
 print(full_df.head(2))
 
