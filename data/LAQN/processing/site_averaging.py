@@ -64,3 +64,4 @@ for year in annual_mean_df.index.year:
         no2_ccg_df.loc[no2_ccg_df.index.year==year, site] = no2_ccg_df.loc[no2_ccg_df.index.year==year, site] - annual_mean
 print(no2_ccg_df)
 
+# Step 3: Standardise the daily deviance by dividing by standard deviation for the monitor
