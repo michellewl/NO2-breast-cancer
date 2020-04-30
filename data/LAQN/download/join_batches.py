@@ -16,6 +16,7 @@ for batch_file in batch_files:
     batch_df = pd.read_csv(filepath, index_col="MeasurementDateGMT")
     batch_df.dropna(axis="columns", how="all", inplace=True)
     batch_df.columns = [column.replace(": Nitrogen Dioxide (ug/m3)", "") for column in batch_df.columns]
+    batch_df.columns = [column.replace("=", "") for column in batch_df.columns]
 
     if no2_df.empty:
         no2_df = batch_df.copy()
