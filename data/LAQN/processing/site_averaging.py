@@ -51,13 +51,20 @@ print(f"\nSite mapping dataframe:\n{site_mapping_df.columns}")
 
 averaged_ccg_df = pd.DataFrame()
 
-for ccg in ccgs:
+for ccg in ["NHS Bromley"]:#ccgs:
     print(f"Processing {ccg}... ({ccgs.index(ccg)} of {len(ccgs)})")
 
     sites = site_mapping_df.loc[site_mapping_df.ccg == ccg, "site_name"].tolist()
     no2_ccg_df = no2_df.copy().reindex(columns=sites).dropna(axis="columns", how="all")
     # print(no2_ccg_df)
 
+    if len(no2_ccg_df.columns) == 1:
+        if averaged_ccg_df.empty:
+            averaged_ccg_df = no2_ccg_df.copy()
+        else:
+            averaged_ccg_df = averaged_ccg_df.join(no2_ccg_df.copy(), how="left")
+        print(f"Able to skip algorithm because only one site in {ccg} had data.")
+        continue
     # Step 1: Compute annual mean for each monitor for each year
     annual_mean_df = no2_ccg_df.resample("A").mean()
     # print(annual_mean_df)
@@ -71,8 +78,9 @@ for ccg in ccgs:
     # print(annual_mean_df)
 
     # Step 3: Standardise the daily deviance by dividing by standard deviation for the monitor
-    sd_per_site = no2_ccg_df.copy().std(axis=0)
-    sd_per_ccg = no2_ccg_df.copy().std(axis=1).std(axis=0)
+    sd_per_site = no2_ccg_df.copy().std(axis=0, ddof=0)
+    sd_per_ccg = no2_ccg_df.values.flatten()[~np.isnan(no2_ccg_df.values.flatten())].std(ddof=0)
+
     # print(sd_per_site)
     # print(sd_per_ccg)
     no2_ccg_df = no2_ccg_df/sd_per_site
@@ -95,6 +103,7 @@ for ccg in ccgs:
         no2_ccg_df.loc[no2_ccg_df.index.year==year, ccg] = \
             no2_ccg_df.loc[no2_ccg_df.index.year==year, ccg] + annual_mean
     no2_ccg_df = no2_ccg_df[[ccg]]
+    print(no2_ccg_df)
 
     if averaged_ccg_df.empty:
         averaged_ccg_df = no2_ccg_df.copy()
