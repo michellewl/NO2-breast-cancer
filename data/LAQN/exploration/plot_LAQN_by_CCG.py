@@ -25,28 +25,36 @@ no2_df.MeasurementDateGMT = pd.to_datetime(no2_df.MeasurementDateGMT)
 # plt.show()
 
 # # Lots of subplots
-fig, axs = plt.subplots(8, 4, figsize=(20, 10))
-
-fig.suptitle(r"LAQN observed NO$_2$ by CCG")
+timeseries, axs = plt.subplots(8, 4, figsize=(25, 20), sharex=True, sharey=True)
+print(f"Plotting timeseries...")
+timeseries.suptitle(r"LAQN observed NO$_2$ by CCG")
 count = 1
 for ax in axs.flat:
     column = no2_df.columns[count]
-    ax.plot(no2_df.MeasurementDateGMT, no2_df[column], alpha=0.3, c=f"C{count}")
+    ax.plot(no2_df.MeasurementDateGMT, no2_df[column], alpha=0.7, c=f"C{count}")
     ax.set(xlabel="Time", ylabel=r"NO$_2$ ($\mu$g m$^{-3}$)")
     ax.label_outer()
     ax.set_title(column)
     count += 1
 
-# plt.figtext(0.2, 0.8, f"")
+timeseries.show()
 
 
-plt.show()
+histogram, axs = plt.subplots(8, 4, figsize=(25, 20), sharex=True, sharey=True)
+print("Plotting histograms...")
+histogram.suptitle(r"LAQN observed NO$_2$ by CCG")
+count = 1
+for ax in axs.flat:
+    column = no2_df.columns[count]
+    ax.hist(no2_df[column], bins=6, alpha=0.7, color=f"C{count}")
+    # ax.set(xlabel="Time", ylabel=r"NO$_2$ ($\mu$g m$^{-3}$)")
+    ax.label_outer()
+    ax.set_title(column)
+    count += 1
 
-# for column in no2_df.iloc[:, 1:].columns:
-#     g = sns.relplot(x="MeasurementDateGMT", y=column, kind="line", data=no2_df, legend=False, height=5, aspect=3)
-#     g.fig.suptitle(f"{column}")
-#     plt.show()
+histogram.show()
 
-# plot_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), f"LAQN_NO2_by_CCG.png")
-# fig.savefig(plot_filename)
+
+# plot_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), f"LAQN_NO2_timeseries.png")
+# timeseries.savefig(plot_filename)
 # print(f"\nSaved plot to:\n{plot_filename}")
