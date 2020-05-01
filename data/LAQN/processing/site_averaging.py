@@ -57,6 +57,10 @@ for ccg in ccgs:
     sites = site_mapping_df.loc[site_mapping_df.ccg == ccg, "site_name"].tolist()
     no2_ccg_df = no2_df.copy().reindex(columns=sites).dropna(axis="columns", how="all")
     # print(no2_ccg_df)
+    
+    if len(no2_ccg_df.columns) == 0:
+        print(f"No data for any sites in {ccg} CCG.")
+        continue
 
     if len(no2_ccg_df.columns) == 1:
         if averaged_ccg_df.empty:
