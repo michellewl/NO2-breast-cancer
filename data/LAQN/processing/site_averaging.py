@@ -50,9 +50,8 @@ print(f"\nSite mapping dataframe:\n{site_mapping_df.columns}")
 
 averaged_ccg_df = pd.DataFrame()
 
-for ccg in site_mapping_df.ccg:
-# ccg = site_mapping_df.ccg[0]
-#print(ccg)
+for ccg in ccgs:
+    print(f"Processing {ccg}...")
 
     sites = site_mapping_df.loc[site_mapping_df.ccg == ccg, "site_name"].tolist()
     no2_ccg_df = no2_df.copy().reindex(columns=sites).dropna(axis="columns", how="all")
