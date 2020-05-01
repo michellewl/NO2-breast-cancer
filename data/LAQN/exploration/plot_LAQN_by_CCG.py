@@ -46,7 +46,7 @@ histogram.suptitle(r"LAQN observed NO$_2$ by CCG")
 count = 1
 for ax in axs.flat:
     column = no2_df.columns[count]
-    ax.hist(no2_df[column], bins=6, alpha=0.7, color=f"C{count}")
+    ax.hist(no2_df[column], alpha=0.7, color=f"C{count}")
     # ax.set(xlabel="Time", ylabel=r"NO$_2$ ($\mu$g m$^{-3}$)")
     ax.label_outer()
     ax.set_title(column)
@@ -54,7 +54,14 @@ for ax in axs.flat:
 
 histogram.show()
 
+print("Saving plots...")
 
-# plot_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), f"LAQN_NO2_timeseries.png")
-# timeseries.savefig(plot_filename)
-# print(f"\nSaved plot to:\n{plot_filename}")
+plot_filename = f"LAQN_NO2_timeseries.png"
+timeseries.savefig(os.path.join(os.path.dirname(os.path.realpath(__file__)), plot_filename))
+print(f"\nSaved {plot_filename}")
+
+plot_filename = f"LAQN_NO2_histograms.png"
+histogram.savefig(os.path.join(os.path.dirname(os.path.realpath(__file__)), plot_filename))
+print(f"\nSaved {plot_filename}")
+
+print("Completed save.")
