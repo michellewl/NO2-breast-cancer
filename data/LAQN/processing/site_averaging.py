@@ -51,17 +51,24 @@ ccg = site_mapping_df.ccg[0]
 
 sites = site_mapping_df.loc[site_mapping_df.ccg == ccg, "site_name"].tolist()
 no2_ccg_df = no2_df.copy().reindex(columns=sites).dropna(axis="columns", how="all")
-print(no2_ccg_df)
+# print(no2_ccg_df)
 
 # Step 1: Compute annual mean for each monitor for each year
 annual_mean_df = no2_ccg_df.resample("A").mean()
-print(annual_mean_df)
+# print(annual_mean_df)
 
 # Step 2: Subtract annual mean from daily measurements to obtain daily deviance for the monitor
 for year in annual_mean_df.index.year:
     for site in no2_ccg_df.columns:
         annual_mean = annual_mean_df.loc[annual_mean_df.index.year==year, site].tolist()*len(no2_ccg_df.loc[no2_ccg_df.index.year==year, site])
         no2_ccg_df.loc[no2_ccg_df.index.year==year, site] = no2_ccg_df.loc[no2_ccg_df.index.year==year, site] - annual_mean
-print(no2_ccg_df)
+# print(no2_ccg_df)
 
 # Step 3: Standardise the daily deviance by dividing by standard deviation for the monitor
+sd_per_site = no2_ccg_df.copy().std(axis=0)
+# print(sd_per_site)
+no2_ccg_df = no2_ccg_df/sd_per_site
+# print(no2_ccg_df)
+
+
+
