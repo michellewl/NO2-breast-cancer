@@ -51,7 +51,7 @@ print(f"\nSite mapping dataframe:\n{site_mapping_df.columns}")
 
 averaged_ccg_df = pd.DataFrame()
 
-for ccg in ["NHS Bromley"]:#ccgs:
+for ccg in ccgs:
     print(f"Processing {ccg}... ({ccgs.index(ccg)} of {len(ccgs)})")
 
     sites = site_mapping_df.loc[site_mapping_df.ccg == ccg, "site_name"].tolist()
@@ -103,7 +103,7 @@ for ccg in ["NHS Bromley"]:#ccgs:
         no2_ccg_df.loc[no2_ccg_df.index.year==year, ccg] = \
             no2_ccg_df.loc[no2_ccg_df.index.year==year, ccg] + annual_mean
     no2_ccg_df = no2_ccg_df[[ccg]]
-    print(no2_ccg_df)
+    # print(no2_ccg_df)
 
     if averaged_ccg_df.empty:
         averaged_ccg_df = no2_ccg_df.copy()
