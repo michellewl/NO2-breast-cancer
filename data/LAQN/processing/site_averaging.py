@@ -52,12 +52,12 @@ print(f"\nSite mapping dataframe:\n{site_mapping_df.columns}")
 averaged_ccg_df = pd.DataFrame()
 
 for ccg in ccgs:
-    print(f"Processing {ccg}... ({ccgs.index(ccg)} of {len(ccgs)})")
+    print(f"\nProcessing {ccg}... ({ccgs.index(ccg)} of {len(ccgs)})")
 
     sites = site_mapping_df.loc[site_mapping_df.ccg == ccg, "site_name"].tolist()
     no2_ccg_df = no2_df.copy().reindex(columns=sites).dropna(axis="columns", how="all")
     # print(no2_ccg_df)
-    
+
     if len(no2_ccg_df.columns) == 0:
         print(f"No data for any sites in {ccg} CCG.")
         continue
