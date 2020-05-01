@@ -27,6 +27,7 @@ ccg_folder = os.path.join(os.path.dirname(folder), "CCG_populations")
 ccg_filename = [file for file in os.listdir(ccg_folder) if "london_females_2002-18.csv" in file][0]
 ccg_df = pd.read_csv(os.path.join(ccg_folder, ccg_filename))
 ccgs = list(set(ccg_df["ccg"].tolist()))
+ccgs.sort()
 # ccgs = [ccg.replace("NHS ", "") for ccg in list(set(ccg_df["ccg"].tolist()))]
 print(f"{len(ccgs)} CCGs.")
 
@@ -51,7 +52,7 @@ print(f"\nSite mapping dataframe:\n{site_mapping_df.columns}")
 averaged_ccg_df = pd.DataFrame()
 
 for ccg in ccgs:
-    print(f"Processing {ccg}...")
+    print(f"Processing {ccg}... ({ccgs.index(ccg)} of {len(ccgs)})")
 
     sites = site_mapping_df.loc[site_mapping_df.ccg == ccg, "site_name"].tolist()
     no2_ccg_df = no2_df.copy().reindex(columns=sites).dropna(axis="columns", how="all")
