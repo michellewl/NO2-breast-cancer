@@ -63,6 +63,7 @@ for ccg in ccgs:
         continue
 
     if len(no2_ccg_df.columns) == 1:
+        no2_ccg_df.columns = [ccg]
         if averaged_ccg_df.empty:
             averaged_ccg_df = no2_ccg_df.copy()
         else:
