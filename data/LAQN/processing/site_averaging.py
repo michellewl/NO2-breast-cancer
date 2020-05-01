@@ -46,29 +46,65 @@ print(f"\nSite mapping dataframe:\n{site_mapping_df.columns}")
 # print(site_mapping_df.site_name)
 
 # Try processing on one ccg first!
-ccg = site_mapping_df.ccg[0]
+# Next try looping through all ccgs...
+
+averaged_ccg_df = pd.DataFrame()
+
+for ccg in site_mapping_df.ccg:
+# ccg = site_mapping_df.ccg[0]
 #print(ccg)
 
-sites = site_mapping_df.loc[site_mapping_df.ccg == ccg, "site_name"].tolist()
-no2_ccg_df = no2_df.copy().reindex(columns=sites).dropna(axis="columns", how="all")
-# print(no2_ccg_df)
+    sites = site_mapping_df.loc[site_mapping_df.ccg == ccg, "site_name"].tolist()
+    no2_ccg_df = no2_df.copy().reindex(columns=sites).dropna(axis="columns", how="all")
+    # print(no2_ccg_df)
 
-# Step 1: Compute annual mean for each monitor for each year
-annual_mean_df = no2_ccg_df.resample("A").mean()
-# print(annual_mean_df)
+    # Step 1: Compute annual mean for each monitor for each year
+    annual_mean_df = no2_ccg_df.resample("A").mean()
+    # print(annual_mean_df)
 
-# Step 2: Subtract annual mean from daily measurements to obtain daily deviance for the monitor
-for year in annual_mean_df.index.year:
-    for site in no2_ccg_df.columns:
-        annual_mean = annual_mean_df.loc[annual_mean_df.index.year==year, site].tolist()*len(no2_ccg_df.loc[no2_ccg_df.index.year==year, site])
-        no2_ccg_df.loc[no2_ccg_df.index.year==year, site] = no2_ccg_df.loc[no2_ccg_df.index.year==year, site] - annual_mean
-# print(no2_ccg_df)
+    # Step 2: Subtract annual mean from daily measurements to obtain daily deviance for the monitor
+    for year in annual_mean_df.index.year:
+        for site in no2_ccg_df.columns:
+            annual_mean = annual_mean_df.loc[annual_mean_df.index.year==year, site].tolist()*len(no2_ccg_df.loc[no2_ccg_df.index.year==year, site])
+            no2_ccg_df.loc[no2_ccg_df.index.year==year, site] = no2_ccg_df.loc[no2_ccg_df.index.year==year, site] - annual_mean
+    annual_mean_df[ccg] = annual_mean_df.mean(axis=1)
+    # print(annual_mean_df)
 
-# Step 3: Standardise the daily deviance by dividing by standard deviation for the monitor
-sd_per_site = no2_ccg_df.copy().std(axis=0)
-# print(sd_per_site)
-no2_ccg_df = no2_ccg_df/sd_per_site
-# print(no2_ccg_df)
+    # Step 3: Standardise the daily deviance by dividing by standard deviation for the monitor
+    sd_per_site = no2_ccg_df.copy().std(axis=0)
+    sd_per_ccg = no2_ccg_df.copy().std(axis=1).std(axis=0)
+    # print(sd_per_site)
+    # print(sd_per_ccg)
+    no2_ccg_df = no2_ccg_df/sd_per_site
+    # print(no2_ccg_df)
 
+    # Step 4: Average the daily standardised deviations to get an average across all monitors
+    no2_ccg_df[ccg] = no2_ccg_df.mean(axis=1)
+    # print(no2_ccg_df)
 
+    # Step 5: Multiply the daily averaged standardised deviation
+    # by the standard deviation across all monitor readings for the entire years (to un-standardise)
+    no2_ccg_df[ccg] = no2_ccg_df[ccg] * sd_per_ccg
+    # print(no2_ccg_df)
 
+    # Step 6: Add the daily average deviance and annual average across all monitors to get a daily average reading
+    for year in annual_mean_df.index.year:
+        annual_mean = annual_mean_df.loc[annual_mean_df.index.year == year, ccg].tolist() * len(
+            no2_ccg_df.loc[no2_ccg_df.index.year == year])
+
+        no2_ccg_df.loc[no2_ccg_df.index.year==year, ccg] = \
+            no2_ccg_df.loc[no2_ccg_df.index.year==year, ccg] + annual_mean
+    no2_ccg_df = no2_ccg_df[[ccg]]
+
+    if averaged_ccg_df.empty:
+        averaged_ccg_df = no2_ccg_df.copy()
+    else:
+        averaged_ccg_df = averaged_ccg_df.join(no2_ccg_df.copy(), how="left")
+
+print(averaged_ccg_df)
+print(averaged_ccg_df.columns)
+
+print("Saving full dataframe...")
+save_filepath = os.path.join(folder, f"NO2_2002-18_averaged_ccgs.csv")
+averaged_ccg_df.to_csv(save_filepath)
+print("Completed save.")
