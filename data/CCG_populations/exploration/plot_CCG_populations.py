@@ -6,7 +6,7 @@ sns.set(style="darkgrid")
 print("Saving plots to:")
 
 folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) # folder where data is saved
-filename = [file for file in os.listdir(folder) if file == "london_all_years.csv"][0]
+filename = [file for file in os.listdir(folder) if file == "london_females_2002-18.csv"][0]
 
 df = pd.read_csv(os.path.join(folder, filename))
 
@@ -18,6 +18,8 @@ for group in age_groupings:
     g = sns.relplot(x="year", y="population", hue="ccg", kind="line", data=plot_df, legend=False, height=5, aspect=3)
     group_name = group.replace("_", " ")
     g.fig.suptitle(f"Female population ({group_name}) of London CCGs")
+    group = group.replace("<", "less_than_")
+    group = group.replace(">=", "greater_than_or_equal_to_")
     # plt.show()
 
     plot_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), f"CCG_fpopulation_{group}.png")

@@ -61,10 +61,10 @@ if process_year == "2002-10" or process_year == "all":
         london_ccg_df.rename(columns= rename_dict,inplace=True)
         london_ccg_df.rename(columns={"Area_Code":"area_code", "Area_Name":"ccg"}, inplace=True)
 
-        london_ccg_df = fn.group_ages(london_ccg_df, 0, 40)
-        london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
-        london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
-        london_ccg_df["all_ages"] = london_ccg_df.below_age_40 + london_ccg_df.age_40_to_70 + london_ccg_df.above_age_70
+        london_ccg_df = fn.group_ages(london_ccg_df, 0, 40, "age_cat_<40")
+        london_ccg_df = fn.group_ages(london_ccg_df, 40, 70, "age_cat_40-69")
+        london_ccg_df = fn.group_ages(london_ccg_df, 70, 91, "age_cat_>=70")
+        london_ccg_df["all_ages"] = london_ccg_df["age_cat_<40"] + london_ccg_df["age_cat_40-69"] + london_ccg_df["age_cat_>=70"]
         london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, year)
         # print(f"Sheet: {required_sheets[i]}\nNumber of CCGs: {len(london_ccg_df)}")
         # print(london_ccg_df.head(2))
@@ -88,9 +88,9 @@ if process_year == "2011" or process_year == "all":
     ccg_col = col_names[col_names.index("Area Name")+2]
     london_ccg_df = london_df.loc[london_df[ccg_col].notna()].drop(columns=["Area Name", col_names[col_names.index("Area Name")+1]])
     london_ccg_df.rename(columns= {"Area Code":"area_code", "All Ages":"all_ages", ccg_col:"ccg", "90+":90},inplace=True)
-    london_ccg_df = fn.group_ages(london_ccg_df, 0, 40)
-    london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
-    london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
+    london_ccg_df = fn.group_ages(london_ccg_df, 0, 40, "age_cat_<40")
+    london_ccg_df = fn.group_ages(london_ccg_df, 40, 70, "age_cat_40-69")
+    london_ccg_df = fn.group_ages(london_ccg_df, 70, 91, "age_cat_>=70")
 
     london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, "2011")
     # print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
@@ -120,9 +120,9 @@ if process_year=="2012-18" or process_year=="all":
         ccg_col = "Area Names"
         london_ccg_df = london_df.loc[london_df[ccg_col].notna()].drop(columns=["Unknown1", "Unknown2"])
         london_ccg_df.rename(columns= {"Area Codes ":"area_code", "All Ages":"all_ages", ccg_col:"ccg", "90+":90},inplace=True)
-        london_ccg_df = fn.group_ages(london_ccg_df, 0, 40)
-        london_ccg_df = fn.group_ages(london_ccg_df, 40, 71)
-        london_ccg_df = fn.group_ages(london_ccg_df, 71, 91)
+        london_ccg_df = fn.group_ages(london_ccg_df, 0, 40, "age_cat_<40")
+        london_ccg_df = fn.group_ages(london_ccg_df, 40, 70, "age_cat_40-69")
+        london_ccg_df = fn.group_ages(london_ccg_df, 70, 91, "age_cat_>=70")
         london_ccg_df = fn.rename_age_cols_with_year(london_ccg_df, year)
         # print(f"Filename: {filename}\nNumber of CCGs: {len(london_ccg_df)}")
         # print(f"{london_ccg_df.head(2)}")
@@ -136,7 +136,7 @@ if process_year=="2012-18" or process_year=="all":
 # Reformat the full dataframe so that all variables are encoded instead of in the column names.
 df = full_df.copy().reset_index().set_index(["area_code", "ccg"])
 
-age_groupings = ["all_ages", "below_age_40", "age_40_to_70", "above_age_70"]
+age_groupings = ["all_ages", "age_cat_<40", "age_cat_40-69", "age_cat_>=70"]
 
 full_df = pd.DataFrame()
 
@@ -159,7 +159,7 @@ for group in age_groupings:
         full_df = pd.concat([full_df, plot_df])
 
 
-print(full_df.head(2))
+print(full_df)
 
 full_df.to_csv(os.path.join(folder, "london_females_2002-18.csv"), index=False)
 print("Saved as .csv file.")

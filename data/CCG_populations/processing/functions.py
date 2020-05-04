@@ -75,7 +75,7 @@ def get_area_df(dataframe, area_col, area, sub_area=False):
 
     return dataframe.iloc[idx_start:idx_end]
 
-def group_ages(dataframe, start, end):
+def group_ages(dataframe, start, end, new_col_name):
     """
     Function to aggregate age groups.
     :param dataframe: Pandas dataframe object.
@@ -85,12 +85,7 @@ def group_ages(dataframe, start, end):
     """
     age_cols = list(range(start, end))
 
-    if start==0:
-        dataframe[f"below_age_{end}"] = dataframe[age_cols].sum(axis=1)
-    elif end == 91:
-        dataframe[f"above_age_{start-1}"] = dataframe[age_cols].sum(axis=1)
-    else:
-        dataframe[f"age_{start}_to_{end-1}"] = dataframe[age_cols].sum(axis=1)
+    dataframe[new_col_name] = dataframe[age_cols].sum(axis=1)
     dataframe = dataframe.drop(columns=age_cols)
     return dataframe
 
