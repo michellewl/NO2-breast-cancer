@@ -16,12 +16,12 @@ print(f"Excel sheets: {sheets}")
 df = fn.load_df_from_xlsheet(filepath, sheets[1])
 
 df.loc[:, "CCG_NAME"] = [ccg.replace(" CCG", "")for ccg in df.CCG_NAME]
-df = df.rename(columns={"BEHAVIOUR_CODE_DESC": "behaviour", "RANK_VAR": "rank", "DIAGNOSISMONTH": "diagnosis_month", "DIAGNOSISYEAR": "diagnosis_year"})
+df = df.rename(columns={"BEHAVIOUR_CODE_DESC": "behaviour", "RANK_VAR": "rank"})
 print(df.columns)
 
 
-df["diagnosis_date"] = df.diagnosis_month.astype(str) + ["/"]*len(df) + df.diagnosis_year.astype(str)
-df.drop(["diagnosis_month", "diagnosis_year"], axis="columns", inplace=True)
+df["diagnosis_date"] = df.DIAGNOSISMONTH.astype(str) + ["/"]*len(df) + df.DIAGNOSISYEAR.astype(str)
+df.drop(["DIAGNOSISMONTH", "DIAGNOSISYEAR"], axis="columns", inplace=True)
 #df["diagnosis_date"] = pd.to_datetime(df["diagnosis_date"], format="%m/%Y")
 #print(df["diagnosis_date"])
 
