@@ -16,12 +16,22 @@ print(f"Excel sheets: {sheets}")
 df = fn.load_df_from_xlsheet(filepath, sheets[1])
 
 df.loc[:, "CCG_NAME"] = [ccg.replace(" CCG", "")for ccg in df.CCG_NAME]
-df = df.rename(columns={"BEHAVIOUR_CODE_DESC": "behaviour", "RANK_VAR": "rank"})
+df = df.rename(columns={"BEHAVIOUR_CODE_DESC": "behaviour", "RANK_VAR": "rank", "DIAGNOSISMONTH": "diagnosis_month", "DIAGNOSISYEAR": "diagnosis_year"})
 print(df.columns)
 
-df = fn.one_hot(df, ["AGE_CAT", "BEHAVIOUR_CODE_DESC", "RANK_VAR"])
+
+df["diagnosis_date"] = df.diagnosis_month.astype(str) + ["/"]*len(df) + df.diagnosis_year.astype(str)
+df.drop(["diagnosis_month", "diagnosis_year"], axis="columns", inplace=True)
+#df["diagnosis_date"] = pd.to_datetime(df["diagnosis_date"], format="%m/%Y")
+#print(df["diagnosis_date"])
+
+df = fn.one_hot(df, ["AGE_CAT", "behaviour", "rank"])
 df.columns = [column.lower() for column in df.columns]
 df.columns = [column.replace(" ", "_") for column in df.columns]
 
 print(df.columns)
 print(df)
+
+save_filename = "female_breast_cancer_london_2002-17.csv"
+df.to_csv(os.path.join(folder, save_filename), index=False)
+print(f"Saved to {save_filename}")
