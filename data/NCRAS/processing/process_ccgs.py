@@ -18,9 +18,10 @@ population_folder = os.path.join(os.path.dirname(folder), "CCG_populations")
 population_filepath = os.path.join(population_folder, "london_females_2002-18.csv")
 pop_df = pd.read_csv(population_filepath)
 print(pop_df.columns)
+pop_df.rename(columns={"area_code": "ccg_code", "ccg": "ccg_name"}, inplace=True)
 
 # # Align the CCG names
-pop_ccgs = pop_df.ccg.unique()
+pop_ccgs = pop_df.ccg_name.unique()
 pop_ccgs.sort()
 ncras_ccgs = cancer_df.ccg_name.unique()
 ncras_ccgs.sort()
@@ -38,7 +39,13 @@ for pop_ccg in odd_ccgs:
 
 cancer_df = cancer_df.replace(map_ccg_names)
 
-cancer_df["year"] = pd.DatetimeIndex(cancer_df.diagnosis_date).year
+# cancer_df["year"] = pd.DatetimeIndex(cancer_df.diagnosis_date).year
+# print(cancer_df)
+#
+# cancer_df = cancer_df.merge(pop_df, on=["year", "ccg_code", "ccg_name"])
+# print(cancer_df)
+
+
 
 # age_categories = [col for col in cancer_df.columns if "age_cat" in col]
 #
