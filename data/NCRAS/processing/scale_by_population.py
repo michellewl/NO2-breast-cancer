@@ -1,8 +1,5 @@
-import re
 import pandas as pd
-import functions as fn
 import os
-import numpy as np
 
 folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # folder where data is saved
 files = [f for f in os.listdir(folder) if "ccgs.csv" in f.lower()]  # lists filepaths (case-insensitive)
@@ -33,8 +30,8 @@ print(scaled_df)
 
 for age_category in age_categories:
     print(age_category)
-    case_column = scaled_df[f"{age_category}_cases"]#.values.to_numpy()
-    population_column = scaled_df[f"{age_category}_pop"]#.values.to_numpy()
+    case_column = scaled_df[f"{age_category}_cases"]
+    population_column = scaled_df[f"{age_category}_pop"]
     #print(case_column)
     scaled_column = (case_column / population_column)
     scaled_df[f"{age_category}"] = scaled_column
