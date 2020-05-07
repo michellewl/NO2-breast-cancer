@@ -25,7 +25,7 @@ no2_df.MeasurementDateGMT = pd.to_datetime(no2_df.MeasurementDateGMT)
 # plt.show()
 
 # # Lots of subplots
-timeseries, axs = plt.subplots(8, 4, figsize=(25, 20), sharex=True, sharey=True)
+timeseries, axs = plt.subplots(8, 4, figsize=(25, 15), sharex=True, sharey=True)
 print(f"Plotting timeseries...")
 timeseries.suptitle(r"LAQN observed NO$_2$ by CCG")
 count = 1
