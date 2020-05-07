@@ -10,15 +10,15 @@ print(f"Filename: {files}")
 filepath = os.path.join(folder, files[0])
 
 cancer_df = pd.read_csv(filepath)
-cancer_df.diagnosis_date = pd.to_datetime(cancer_df.diagnosis_date)
+cancer_df.date = pd.to_datetime(cancer_df.date)
 
 print(cancer_df.columns)
 
 population_folder = os.path.join(os.path.dirname(folder), "CCG_populations")
-population_filepath = os.path.join(population_folder, "london_females_2002-18.csv")
+population_filepath = os.path.join(population_folder, "london_female_pop_monthly_2002-06_2018-06.csv")
 pop_df = pd.read_csv(population_filepath)
 print(pop_df.columns)
-pop_df.rename(columns={"area_code": "ccg_code", "ccg": "ccg_name"}, inplace=True)
+#pop_df.rename(columns={"area_code": "ccg_code", "ccg": "ccg_name"}, inplace=True)
 
 # # Align the CCG names
 pop_ccgs = pop_df.ccg_name.unique()
@@ -47,18 +47,18 @@ cancer_df = cancer_df.replace(map_ccg_names)
 
 
 
-# age_categories = [col for col in cancer_df.columns if "age_cat" in col]
-#
-# ccg_df = pd.DataFrame()
-# for age_cat in age_categories:
-#     ccg_df[age_cat] = cancer_df.groupby(["ccg_code","ccg_name", "diagnosis_date"])[age_cat].sum()
+age_categories = [col for col in cancer_df.columns if "age_cat" in col]
+
+ccg_df = pd.DataFrame()
+for age_cat in age_categories:
+    ccg_df[age_cat] = cancer_df.groupby(["ccg_code","ccg_name", "date"])[age_cat].sum()
 
 
 
-# # Sum all the age groups
-# ccg_df["all_ages"] = ccg_df.sum(axis=1)
-# print(ccg_df)
-#
-# save_filename = "female_breast_cancer_london_2002-17_ccgs.csv"
-# ccg_df.to_csv(os.path.join(folder, save_filename), index=True)
-# print(f"Saved to {save_filename}")
+# Sum all the age groups
+ccg_df["all_ages"] = ccg_df.sum(axis=1)
+print(ccg_df)
+
+save_filename = "female_breast_cancer_london_2002-17_age_grouped_ccgs.csv"
+ccg_df.to_csv(os.path.join(folder, save_filename), index=True)
+print(f"Saved to {save_filename}")

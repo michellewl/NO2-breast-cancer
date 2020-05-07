@@ -3,6 +3,7 @@ import pandas as pd
 import functions as fn
 import os
 import numpy as np
+from pandas.tseries.offsets import MonthEnd
 
 folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) # folder where data is downloaded
 files = [f for f in os.listdir(folder) if '.xls' in f.lower()] # lists filepaths for all Excel files (case-insensitive)
@@ -20,10 +21,10 @@ df = df.rename(columns={"BEHAVIOUR_CODE_DESC": "behaviour", "RANK_VAR": "rank"})
 print(df.columns)
 
 
-df["diagnosis_date"] = df.DIAGNOSISMONTH.astype(str) + ["/"]*len(df) + df.DIAGNOSISYEAR.astype(str)
+df["date"] = df.DIAGNOSISMONTH.astype(str) + ["/"]*len(df) + df.DIAGNOSISYEAR.astype(str)
 df.drop(["DIAGNOSISMONTH", "DIAGNOSISYEAR"], axis="columns", inplace=True)
-#df["diagnosis_date"] = pd.to_datetime(df["diagnosis_date"], format="%m/%Y")
-#print(df["diagnosis_date"])
+df["date"] = pd.to_datetime(df["date"], format="%m/%Y") + MonthEnd(1)
+print(df["date"])
 
 df = fn.one_hot(df, ["AGE_CAT", "behaviour", "rank"])
 df.columns = [column.lower() for column in df.columns]
