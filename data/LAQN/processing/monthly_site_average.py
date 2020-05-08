@@ -16,3 +16,7 @@ print(monthly_mean_df)
 monthly_min_df = no2_df.copy().resample("M").min()
 monthly_max_df = no2_df.copy().resample("M").max()
 print(monthly_min_df, monthly_max_df)
+
+monthly_mean_df.to_csv(os.path.join(folder, "NO2_2002-18_ccgs_monthly_mean.csv"), index=True)
+monthly_min_df.to_csv(os.path.join(folder, "NO2_2002-18_ccgs_monthly_min.csv"), index=True)
+monthly_max_df.to_csv(os.path.join(folder, "NO2_2002-18_ccgs_monthly_max.csv"), index=True)
