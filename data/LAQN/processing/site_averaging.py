@@ -74,7 +74,7 @@ for ccg in ccgs:
     annual_mean_df = no2_ccg_df.resample("A").mean()
     # print(annual_mean_df)
 
-    # Step 2: Subtract annual mean from daily measurements to obtain daily deviance for the monitor
+    # Step 2: Subtract annual mean from hourly measurements to obtain hourly deviance for the monitor
     for year in annual_mean_df.index.year:
         for site in no2_ccg_df.columns:
             annual_mean = annual_mean_df.loc[annual_mean_df.index.year==year, site].tolist()*len(no2_ccg_df.loc[no2_ccg_df.index.year==year, site])
@@ -82,7 +82,7 @@ for ccg in ccgs:
     annual_mean_df[ccg] = annual_mean_df.mean(axis=1)
     # print(annual_mean_df)
 
-    # Step 3: Standardise the daily deviance by dividing by standard deviation for the monitor
+    # Step 3: Standardise the hourly deviance by dividing by standard deviation for the monitor
     sd_per_site = no2_ccg_df.copy().std(axis=0, ddof=0)
     sd_per_ccg = no2_ccg_df.values.flatten()[~np.isnan(no2_ccg_df.values.flatten())].std(ddof=0)
 
@@ -91,16 +91,16 @@ for ccg in ccgs:
     no2_ccg_df = no2_ccg_df/sd_per_site
     # print(no2_ccg_df)
 
-    # Step 4: Average the daily standardised deviations to get an average across all monitors
+    # Step 4: Average the hourly standardised deviations to get an average across all monitors
     no2_ccg_df[ccg] = no2_ccg_df.mean(axis=1)
     # print(no2_ccg_df)
 
-    # Step 5: Multiply the daily averaged standardised deviation
+    # Step 5: Multiply the hourly averaged standardised deviation
     # by the standard deviation across all monitor readings for the entire years (to un-standardise)
     no2_ccg_df[ccg] = no2_ccg_df[ccg] * sd_per_ccg
     # print(no2_ccg_df)
 
-    # Step 6: Add the daily average deviance and annual average across all monitors to get a daily average reading
+    # Step 6: Add the hourly average deviance and annual average across all monitors to get a hourly average reading
     for year in annual_mean_df.index.year:
         annual_mean = annual_mean_df.loc[annual_mean_df.index.year == year, ccg].tolist() * len(
             no2_ccg_df.loc[no2_ccg_df.index.year == year])
