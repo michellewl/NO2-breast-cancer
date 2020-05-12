@@ -10,5 +10,5 @@ Monthly statistics:
 - Minimum
 - Maximum
 
-![Westminster CCG]("NHS_Central_London_(Westminster).png")
-![Richmond CCG]("NHS_Richmond.png")
+![Westminster CCG](NHS_Central_London_(Westminster).png)
+![Richmond CCG](NHS_Richmond.png)
