@@ -1,14 +1,17 @@
 Exploration for 2 example CCGs, using each age category and each monthly statistic.
 
 ### Age categories:
-- Below 40
+(Top to bottom)
 - 40 to 69
+- Below 40
 - 70 and above
+- All ages
 
 ### Monthly statistics:
+(Left to right)
+- Maximum
 - Mean
 - Minimum
-- Maximum
 
 ## NHS Central London (Westminster)
 (An example of high emissions in London.)
