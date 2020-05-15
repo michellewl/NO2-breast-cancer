@@ -32,7 +32,9 @@ no2_min_df = pd.read_csv(os.path.join(no2_folder, no2_filenames[2])).set_index("
 no2_min_df.index = pd.to_datetime(no2_min_df.index)
 # print(no2_min_df)
 
-ncras_df.date = pd.to_datetime(ncras_df.date)
+ncras_df.reset_index(inplace=True)
+ncras_df.set_index("date", inplace=True)
+ncras_df.index = pd.to_datetime(ncras_df.index)
 
 age_categories = [col for col in ncras_df.columns if "age" in col]
 
@@ -42,16 +44,27 @@ ccg = ccgs[0]
 age_category = age_categories[-1]
 print(f"{ccg}\n{age_category}")
 
-# Get data arrays
+# Get data arrays and split x and y into train and test (prediction) sets.
+test_year = 2017
 
-x_array = np.concatenate((no2_max_df[ccg].values.reshape(-1, 1), no2_mean_df[ccg].values.reshape(-1, 1)), axis=1)
-# print(x_array)
+x_train = np.concatenate((no2_max_df.loc[no2_max_df.index.year != test_year, ccg].values.reshape(-1, 1),
+                          no2_mean_df.loc[no2_mean_df.index.year != test_year, ccg].values.reshape(-1, 1)), axis=1)
+x_test = np.concatenate((no2_max_df.loc[no2_max_df.index.year == test_year, ccg].values.reshape(-1, 1),
+                         no2_mean_df.loc[no2_mean_df.index.year == test_year, ccg].values.reshape(-1, 1)), axis=1)
 
-y_array = ncras_df.loc[ccg, age_category].values.reshape(-1, 1)
-# print(y_array)
+y_train = ncras_df.loc[(ncras_df.index.year != test_year) & (ncras_df.ccg_name == ccg), age_category]\
+    .values.reshape(-1, 1)
+y_test = ncras_df.loc[(ncras_df.index.year == test_year) & (ncras_df.ccg_name == ccg), age_category]\
+    .values.reshape(-1, 1)
 
-# Split x and y into train and test (prediction) sets
+print(f"x train: {x_train.shape}"
+      f"\ny train: {y_train.shape}"
+      f"\nx test: {x_test.shape}"
+      f"\ny test: {y_test.shape}")
+
 # Normalise input and output training data
+
+
 # Save normalisation to later apply to test sets
 # Fit the linear model
 # Save the linear model
