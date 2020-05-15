@@ -5,7 +5,7 @@ from os.path import join, dirname, realpath
 import re
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
-from sklearn.externals import joblib
+import joblib
 import pickle
 
 no2_folder = join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN")
@@ -85,6 +85,9 @@ joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
 joblib.dump(y_normaliser, join(save_folder, "y_normaliser.sav"))
 
 # Fit the linear model
+lin_regressor = LinearRegression().fit(x_train, y_train)
+r_sq = lin_regressor.score(x_train, y_train)
+print(f"R squared on training set: {r_sq}")
 # Save the linear model
 
 
