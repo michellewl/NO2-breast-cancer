@@ -42,7 +42,7 @@ age_categories = [col for col in ncras_df.columns if "age" in col]
 
 # One CCG, one age category
 
-ccg = ccgs[0]
+ccg = ccgs[1]
 age_category = age_categories[-1]
 print(f"{ccg}\n{age_category}")
 
