@@ -1,12 +1,11 @@
 import numpy as np
 import pandas as pd
-from os import listdir
-from os.path import join, dirname, realpath
+from os import listdir, makedirs
+from os.path import join, dirname, realpath, exists
 import re
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 import joblib
-import pickle
 
 no2_folder = join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN")
 no2_filenames = [f for f in listdir(no2_folder) if re.findall("ccgs_monthly_\w+.csv", f)]
@@ -66,9 +65,11 @@ print(f"x train: {x_train.shape}"
       f"\ny test: {y_test.shape}")
 
 # Save the arrays
-save_folder = dirname(realpath(__file__))
-# This isn't strictly necessary for saving in the same folder as the script,
-# but if I want to change the folder later on it will save time.
+if not exists(ccg):
+    makedirs(ccg)
+save_folder = join(dirname(realpath(__file__)), ccg)
+# print(save_folder)
+
 np.save(join(save_folder, "x_train"), x_train)
 np.save(join(save_folder, "x_test"), x_test)
 np.save(join(save_folder, "y_train"), y_train)
@@ -89,6 +90,7 @@ lin_regressor = LinearRegression().fit(x_train, y_train)
 r_sq = lin_regressor.score(x_train, y_train)
 print(f"R squared on training set: {r_sq}")
 # Save the linear model
+joblib.dump(lin_regressor, join(save_folder, "linear_regressor.sav"))
 
 
 
