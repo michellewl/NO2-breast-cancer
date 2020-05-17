@@ -59,8 +59,10 @@ for ax in axs.flatten():
     ax.set_ylabel(f"Breast cancer cases ({age_category.replace( '_', ' ')}) per capita")
 
 fig.suptitle(f"Linear regression for {ccg}")
+
+plt.legend(loc=1)
 fig.subplots_adjust(top=0.5)
-plt.legend()
 fig.tight_layout()
+
 fig.savefig(join(load_folder, f"linear_regression_cases_{age_category}.png"), dpi=fig.dpi)
 plt.show()
