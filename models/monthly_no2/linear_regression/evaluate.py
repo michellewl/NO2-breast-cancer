@@ -3,6 +3,7 @@ from os.path import join, dirname, realpath
 import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
 sns.set(style="darkgrid")
 
@@ -21,23 +22,23 @@ x_normaliser, y_normaliser = joblib.load(join(load_folder, "x_normaliser.sav")),
                              joblib.load(join(load_folder, "y_normaliser.sav"))
 
 # Normalise
-x_train, x_test = x_normaliser.transform(x_train), x_normaliser.transform(x_test)
-y_train, y_test = y_normaliser.transform(y_train), y_normaliser.transform(y_test)
+x_train_norm, x_test_norm = x_normaliser.transform(x_train), x_normaliser.transform(x_test)
+y_train_norm, y_test_norm = y_normaliser.transform(y_train), y_normaliser.transform(y_test)
 
 # Load linear regression model
 linear_regressor = joblib.load(join(load_folder, "linear_regressor.sav"))
 
 # Evaluate the model
-train_rsq_score = linear_regressor.score(x_train, y_train)
-test_rsq_score = linear_regressor.score(x_test, y_test)
+train_rsq_score = linear_regressor.score(x_train_norm, y_train_norm)
+test_rsq_score = linear_regressor.score(x_test_norm, y_test_norm)
 print(f"R squared on test set: {test_rsq_score}")
 
 # Predict and un-normalise
-y_train_predict = linear_regressor.predict(x_train)
-y_train, y_train_predict = y_normaliser.inverse_transform(y_train), y_normaliser.inverse_transform(y_train_predict)
+y_train_predict_norm = linear_regressor.predict(x_train_norm)
+y_train_predict = y_normaliser.inverse_transform(y_train_predict_norm)
 
-y_predict = linear_regressor.predict(x_test)
-y_test, y_predict = y_normaliser.inverse_transform(y_test), y_normaliser.inverse_transform(y_predict)
+y_predict_norm = linear_regressor.predict(x_test_norm)
+y_predict = y_normaliser.inverse_transform(y_predict_norm)
 
 # Plot prediction
 train_dates = pd.date_range(f"2002-06", f"{test_year}-01", freq="M")
@@ -64,5 +65,34 @@ plt.legend(loc=1)
 fig.subplots_adjust(top=0.5)
 fig.tight_layout()
 
-fig.savefig(join(load_folder, f"linear_regression_cases_{age_category}.png"), dpi=fig.dpi)
+fig.savefig(join(load_folder, f"time_series_{age_category}.png"), dpi=fig.dpi)
+plt.show()
+
+# Visualise linear regression model
+plt.clf()
+#scatter_fig, ax = plt.subplots(figsize=(15, 10))
+
+scatter_fig = plt.figure(figsize=(13, 10))
+ax = scatter_fig.add_subplot(111, projection='3d')
+
+x_plot = np.concatenate((np.arange(x_train_norm.min(), x_train_norm.max()).reshape(-1,1),
+                        np.arange(x_train_norm.min(), x_train_norm.max()).reshape(-1,1)),
+                        axis=1)
+# y_plot = linear_regressor.predict(x_plot)
+
+x_plot, y_plot = np.meshgrid(x_plot[:, 0], x_plot[:, 1])
+z_plot = linear_regressor.predict(pd.DataFrame({'x': x_plot.ravel(), 'y': y_plot.ravel()}))
+
+ax.plot_surface(x_plot, y_plot, z_plot.reshape(x_plot.shape), rstride=1, cstride=1, alpha=0.3, color="C1")
+ax.scatter(x_train_norm[:, 0], x_train_norm[:, 1], y_train_norm[:, 0], label="data (normalised)", alpha=1)
+ax.set_xlabel("monthly max $NO_2$")
+ax.set_ylabel("monthly mean $NO_2$")
+ax.set_zlabel("breast cancer cases per capita")
+
+scatter_fig.suptitle(f"Linear regression for {ccg} (training set)")
+
+plt.legend(loc=1)
+scatter_fig.tight_layout()
+
+scatter_fig.savefig(join(load_folder, f"scatter_plot_{age_category}.png"), dpi=scatter_fig.dpi)
 plt.show()
