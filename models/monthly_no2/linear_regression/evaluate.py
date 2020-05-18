@@ -8,7 +8,7 @@ import seaborn as sns
 sns.set(style="darkgrid")
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[0]
+ccg = ccgs[1]
 age_category = "all_ages"
 test_year = 2017
 
