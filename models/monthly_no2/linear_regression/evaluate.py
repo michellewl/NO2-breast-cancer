@@ -84,12 +84,12 @@ x_plot, y_plot = np.meshgrid(x_plot[:, 0], x_plot[:, 1])
 z_plot = linear_regressor.predict(pd.DataFrame({'x': x_plot.ravel(), 'y': y_plot.ravel()}))
 
 ax.plot_surface(x_plot, y_plot, z_plot.reshape(x_plot.shape), rstride=1, cstride=1, alpha=0.3, color="C1")
-ax.scatter(x_train_norm[:, 0], x_train_norm[:, 1], y_train_norm[:, 0], label="data (normalised)", alpha=1)
+ax.scatter(x_train_norm[:, 0], x_train_norm[:, 1], y_train_norm[:, 0], label="training data (normalised)", alpha=1)
 ax.set_xlabel("monthly max $NO_2$")
 ax.set_ylabel("monthly mean $NO_2$")
 ax.set_zlabel("breast cancer cases per capita")
 
-scatter_fig.suptitle(f"Linear regression for {ccg} (training set)")
+scatter_fig.suptitle(f"Linear regression for {ccg}")
 
 plt.legend(loc=1)
 scatter_fig.tight_layout()
