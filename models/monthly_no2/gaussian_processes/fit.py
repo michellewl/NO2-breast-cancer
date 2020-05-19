@@ -7,6 +7,8 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 import sklearn.gaussian_process as gp
 import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set(style="darkgrid")
 
 no2_folder = join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN")
 no2_filenames = [f for f in listdir(no2_folder) if re.findall("ccgs_monthly_\w+.csv", f)]
@@ -23,15 +25,18 @@ ncras_df = pd.read_csv(join(ncras_folder, ncras_filename)).set_index("ccg_name")
 
 # print(ncras_df)
 
-no2_max_df = pd.read_csv(join(no2_folder, no2_filenames[0])).set_index("MeasurementDateGMT").loc[ncras_df.date.unique().tolist(), ccgs]
+no2_max_df = pd.read_csv(join(no2_folder, no2_filenames[0])).set_index("MeasurementDateGMT").loc[
+    ncras_df.date.unique().tolist(), ccgs]
 no2_max_df.index = pd.to_datetime(no2_max_df.index)
 # print(no2_max_df)
 
-no2_mean_df = pd.read_csv(join(no2_folder, no2_filenames[1])).set_index("MeasurementDateGMT").loc[ncras_df.date.unique().tolist(), ccgs]
+no2_mean_df = pd.read_csv(join(no2_folder, no2_filenames[1])).set_index("MeasurementDateGMT").loc[
+    ncras_df.date.unique().tolist(), ccgs]
 no2_mean_df.index = pd.to_datetime(no2_mean_df.index)
 # print(no2_mean_df)
 
-no2_min_df = pd.read_csv(join(no2_folder, no2_filenames[2])).set_index("MeasurementDateGMT").loc[ncras_df.date.unique().tolist(), ccgs]
+no2_min_df = pd.read_csv(join(no2_folder, no2_filenames[2])).set_index("MeasurementDateGMT").loc[
+    ncras_df.date.unique().tolist(), ccgs]
 no2_min_df.index = pd.to_datetime(no2_min_df.index)
 # print(no2_min_df)
 
@@ -55,9 +60,9 @@ x_train = np.concatenate((no2_max_df.loc[no2_max_df.index.year != test_year, ccg
 x_test = np.concatenate((no2_max_df.loc[no2_max_df.index.year == test_year, ccg].values.reshape(-1, 1),
                          no2_mean_df.loc[no2_mean_df.index.year == test_year, ccg].values.reshape(-1, 1)), axis=1)
 
-y_train = ncras_df.loc[(ncras_df.index.year != test_year) & (ncras_df.ccg_name == ccg), age_category]\
+y_train = ncras_df.loc[(ncras_df.index.year != test_year) & (ncras_df.ccg_name == ccg), age_category] \
     .values.reshape(-1, 1)
-y_test = ncras_df.loc[(ncras_df.index.year == test_year) & (ncras_df.ccg_name == ccg), age_category]\
+y_test = ncras_df.loc[(ncras_df.index.year == test_year) & (ncras_df.ccg_name == ccg), age_category] \
     .values.reshape(-1, 1)
 
 print(f"x train: {x_train.shape}"
@@ -88,40 +93,20 @@ joblib.dump(y_normaliser, join(save_folder, "y_normaliser.sav"))
 
 # Fit the Gaussian process regression model
 # Try using one dimensional input.
-### Code copied over from prev. work.
+# Code copied over from prev. work.
 
 print("Fitting Gaussian process model...")
 
 # set up covariance function
 nu = 1
-sigma = 1
-lambbda = np.exp(-1)
+sigma_init = 0.5
+lamda = np.exp(-1)
 
-kernel_1 = nu**2 * gp.kernels.RBF(length_scale=lambbda) + gp.kernels.WhiteKernel(noise_level=sigma)
+kernel_init = nu ** 2 * gp.kernels.RBF(length_scale=lamda) + gp.kernels.WhiteKernel(noise_level=sigma_init)
 
 # set up GP model
-model_GP = gp.GaussianProcessRegressor(kernel=kernel_1)
-x1 = x_train[:, 1]
-model_GP.fit(x1.reshape(-1, 1), y_train)
+model_GP = gp.GaussianProcessRegressor(kernel=kernel_init)
+model_GP.fit(x_train, y_train)
 
-# filename = f"GP_model.sav"
-# pickle.dump(model, open(filename, "wb"))
-#
-# print("Saved model.")
-
-
-# predict the mean function with 95% confidence error bars
-mean_fn_plotx = np.linspace(-3, 3, 500)
-#mean_fn_plotx = np.concatenate((np.arange(x_train.min(), x_train.max()).reshape(-1, 1),
-#                                         np.arange(x_train.min(), x_train.max()).reshape(-1, 1)), axis=1)
-mu, sigma_2 = model_GP.predict(mean_fn_plotx.reshape(-1, 1), return_std=True)
-
-fig, ax = plt.subplots(figsize=(10, 6))
-
-ax.fill_between(mean_fn_plotx, mu.squeeze() - 2*sigma_2, mu.squeeze() + 2*sigma_2, alpha=0.2)
-ax.plot(mean_fn_plotx, mu.squeeze())
-ax.scatter(x1, y_train, color='black')
-ax.set_title(model_GP.kernel_)
-ax.annotate("log marginal likelihood = "+str(round(model_GP.log_marginal_likelihood(), 4)),
-            xy=(x1.min(), y_train.max()*1.05), fontsize=12)
-plt.show()
+# Save the GP model
+joblib.dump(model_GP, join(save_folder, "gp_regressor.sav"))
