@@ -99,7 +99,7 @@ print("Fitting Gaussian process model...")
 
 # set up covariance function
 nu = 1
-sigma_init = 0.5
+sigma_init = 0.6
 lamda = np.exp(-1)
 
 kernel_init = nu ** 2 * gp.kernels.RBF(length_scale=lamda) + gp.kernels.WhiteKernel(noise_level=sigma_init)
@@ -110,3 +110,4 @@ model_GP.fit(x_train, y_train)
 
 # Save the GP model
 joblib.dump(model_GP, join(save_folder, "gp_regressor.sav"))
+print(f"Model saved.")
