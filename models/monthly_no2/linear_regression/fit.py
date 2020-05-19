@@ -9,7 +9,7 @@ import joblib
 
 no2_folder = join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN")
 no2_filenames = [f for f in listdir(no2_folder) if re.findall("ccgs_monthly_\w+.csv", f)]
-no2_filenames.sort() # sorts files to max, mean, min order
+no2_filenames.sort()  # sorts files to max, mean, min order
 # print(no2_filenames)
 
 ncras_folder = join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "NCRAS")
