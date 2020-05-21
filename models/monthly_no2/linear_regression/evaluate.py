@@ -7,7 +7,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
 sns.set(style="darkgrid")
 
-aggregation = ["mean", "min", "max"]
+# aggregation = ["mean", "min", "max"]
+aggregation = ["mean", "max"]
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
 ccg = ccgs[1]
 age_category = "all_ages"
@@ -87,8 +88,8 @@ if len(aggregation) == 2:
 
     ax.plot_surface(x_plot, y_plot, z_plot.reshape(x_plot.shape), rstride=1, cstride=1, alpha=0.3, color="C1")
     ax.scatter(x_train_norm[:, 0], x_train_norm[:, 1], y_train_norm[:, 0], label="training data (normalised)", alpha=1)
-    ax.set_xlabel("monthly max $NO_2$")
-    ax.set_ylabel("monthly mean $NO_2$")
+    ax.set_xlabel(f"monthly {aggregation[0]} $NO_2$")
+    ax.set_ylabel(f"monthly {aggregation[1]} $NO_2$")
     ax.set_zlabel("breast cancer cases per capita")
 
     scatter_fig.suptitle(f"Linear regression for {ccg}")
