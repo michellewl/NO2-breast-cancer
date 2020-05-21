@@ -1,13 +1,14 @@
 import pandas as pd
-import os
+from os.path import dirname, realpath, join, exists
+from os import listdir, makedirs
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="darkgrid")
 
-folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) # folder where data is saved
+folder = join(dirname(dirname(realpath(__file__))), "annual")  # folder where data is saved
 
 annual_stat = "mean"
-annual_df = pd.read_csv(os.path.join(folder, f"NO2_2002-18_ccgs_annual_{annual_stat}.csv"), index_col="MeasurementDateGMT")
+annual_df = pd.read_csv(join(folder, f"NO2_2002-18_ccgs_annual_{annual_stat}.csv"), index_col="MeasurementDateGMT")
 annual_df.index = pd.to_datetime(annual_df.index)
 # print(annual_df)
 
@@ -27,7 +28,7 @@ for ax in axs.flat:
 timeseries.show()
 
 plot_filename = f"LAQN_NO2_timeseries_annual_{annual_stat}.png"
-timeseries.savefig(os.path.join(os.path.dirname(os.path.realpath(__file__)), plot_filename))
+timeseries.savefig(join(dirname(realpath(__file__)), plot_filename))
 print(f"Saved {plot_filename}")
 
 #

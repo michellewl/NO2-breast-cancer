@@ -10,10 +10,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="darkgrid")
 
-aggregation = ["mean", "min", "max"]
+# aggregation = ["mean", "min", "max"]
+aggregation = ["mean"]
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[1]
+ccg = ccgs[0]
 age_category = "all_ages"
 test_year = 2017
 

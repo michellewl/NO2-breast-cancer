@@ -10,9 +10,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="darkgrid")
 
-aggregation = ["mean", "min", "max"]
+# aggregation = ["mean", "min", "max"]
+aggregation = ["mean"]
 
-no2_folder = join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN")
+no2_folder = join(join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN"), "monthly")
 no2_filenames = [file for method in aggregation for file in listdir(no2_folder) if re.findall(f"ccgs_monthly_{method}.csv", file)]
 print(no2_filenames)
 
@@ -21,7 +22,7 @@ ncras_filename = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.
 # print(ncras_filename)
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[1]
+ccg = ccgs[0]
 test_year = 2017
 
 ncras_df = pd.read_csv(join(ncras_folder, ncras_filename)).set_index("ccg_name").loc[ccgs]
@@ -50,22 +51,6 @@ for no2_df in no2_df_list:
     no2_test_array_list.append(no2_array)
 # print(no2_test_array_list)
 
-
-# no2_max_df = pd.read_csv(join(no2_folder, no2_filenames[0])).set_index("MeasurementDateGMT").loc[
-#     ncras_df.date.unique().tolist(), ccgs]
-# no2_max_df.index = pd.to_datetime(no2_max_df.index)
-# # print(no2_max_df)
-#
-# no2_mean_df = pd.read_csv(join(no2_folder, no2_filenames[1])).set_index("MeasurementDateGMT").loc[
-#     ncras_df.date.unique().tolist(), ccgs]
-# no2_mean_df.index = pd.to_datetime(no2_mean_df.index)
-# # print(no2_mean_df)
-#
-# no2_min_df = pd.read_csv(join(no2_folder, no2_filenames[2])).set_index("MeasurementDateGMT").loc[
-#     ncras_df.date.unique().tolist(), ccgs]
-# no2_min_df.index = pd.to_datetime(no2_min_df.index)
-# # print(no2_min_df)
-
 ncras_df.reset_index(inplace=True)
 ncras_df.set_index("date", inplace=True)
 ncras_df.index = pd.to_datetime(ncras_df.index)
@@ -73,8 +58,6 @@ ncras_df.index = pd.to_datetime(ncras_df.index)
 age_categories = [col for col in ncras_df.columns if "age" in col]
 
 # One CCG, one age category
-
-
 age_category = age_categories[-1]
 print(f"{ccg}\n{age_category}")
 
