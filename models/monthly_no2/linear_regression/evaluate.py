@@ -7,13 +7,14 @@ from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
 sns.set(style="darkgrid")
 
+aggregation = ["mean", "min", "max"]
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
 ccg = ccgs[1]
 age_category = "all_ages"
 test_year = 2017
 
 # Load the arrays
-load_folder = join(dirname(realpath(__file__)), ccg)
+load_folder = join(join(dirname(realpath(__file__)), ccg), "_".join(aggregation))
 x_train, x_test = np.load(join(load_folder, "x_train.npy")), np.load(join(load_folder, "x_test.npy"))
 y_train, y_test = np.load(join(load_folder, "y_train.npy")), np.load(join(load_folder, "y_test.npy"))
 
@@ -68,31 +69,32 @@ fig.tight_layout()
 fig.savefig(join(load_folder, f"time_series_{age_category}.png"), dpi=fig.dpi)
 plt.show()
 
-# Visualise linear regression model
-plt.clf()
-#scatter_fig, ax = plt.subplots(figsize=(15, 10))
+if len(aggregation) == 2:
+    # Visualise linear regression model
+    plt.clf()
+    #scatter_fig, ax = plt.subplots(figsize=(15, 10))
 
-scatter_fig = plt.figure(figsize=(13, 10))
-ax = scatter_fig.add_subplot(111, projection='3d')
+    scatter_fig = plt.figure(figsize=(13, 10))
+    ax = scatter_fig.add_subplot(111, projection='3d')
 
-x_plot = np.concatenate((np.arange(x_train_norm.min(), x_train_norm.max()).reshape(-1,1),
-                        np.arange(x_train_norm.min(), x_train_norm.max()).reshape(-1,1)),
-                        axis=1)
-# y_plot = linear_regressor.predict(x_plot)
+    x_plot = np.concatenate((np.arange(x_train_norm.min(), x_train_norm.max()).reshape(-1,1),
+                            np.arange(x_train_norm.min(), x_train_norm.max()).reshape(-1,1)),
+                            axis=1)
+    # y_plot = linear_regressor.predict(x_plot)
 
-x_plot, y_plot = np.meshgrid(x_plot[:, 0], x_plot[:, 1])
-z_plot = linear_regressor.predict(pd.DataFrame({'x': x_plot.ravel(), 'y': y_plot.ravel()}))
+    x_plot, y_plot = np.meshgrid(x_plot[:, 0], x_plot[:, 1])
+    z_plot = linear_regressor.predict(pd.DataFrame({'x': x_plot.ravel(), 'y': y_plot.ravel()}))
 
-ax.plot_surface(x_plot, y_plot, z_plot.reshape(x_plot.shape), rstride=1, cstride=1, alpha=0.3, color="C1")
-ax.scatter(x_train_norm[:, 0], x_train_norm[:, 1], y_train_norm[:, 0], label="training data (normalised)", alpha=1)
-ax.set_xlabel("monthly max $NO_2$")
-ax.set_ylabel("monthly mean $NO_2$")
-ax.set_zlabel("breast cancer cases per capita")
+    ax.plot_surface(x_plot, y_plot, z_plot.reshape(x_plot.shape), rstride=1, cstride=1, alpha=0.3, color="C1")
+    ax.scatter(x_train_norm[:, 0], x_train_norm[:, 1], y_train_norm[:, 0], label="training data (normalised)", alpha=1)
+    ax.set_xlabel("monthly max $NO_2$")
+    ax.set_ylabel("monthly mean $NO_2$")
+    ax.set_zlabel("breast cancer cases per capita")
 
-scatter_fig.suptitle(f"Linear regression for {ccg}")
+    scatter_fig.suptitle(f"Linear regression for {ccg}")
 
-plt.legend(loc=1)
-scatter_fig.tight_layout()
+    plt.legend(loc=1)
+    scatter_fig.tight_layout()
 
-scatter_fig.savefig(join(load_folder, f"scatter_plot_{age_category}.png"), dpi=scatter_fig.dpi)
-plt.show()
+    scatter_fig.savefig(join(load_folder, f"scatter_plot_{age_category}.png"), dpi=scatter_fig.dpi)
+    plt.show()
