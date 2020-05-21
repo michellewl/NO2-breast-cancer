@@ -10,12 +10,12 @@ sns.set(style="darkgrid")
 # aggregation = ["mean", "min", "max"]
 # aggregation = ["mean", "max"]
 # aggregation = ["mean"]
-quantile_step = 0.1  # Make this False if not using.
+quantile_step = 0.25  # Make this False if not using.
 aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
 print(aggregation)
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[1]
+ccg = ccgs[0]
 age_category = "all_ages"
 test_year = 2017
 

@@ -10,7 +10,7 @@ import joblib
 # aggregation = ["mean", "min", "max"]
 # aggregation = ["mean", "max"]
 # aggregation = ["mean"]
-quantile_step = 0.1
+quantile_step = 0.25
 aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
 print(aggregation)
 
@@ -23,7 +23,7 @@ ncras_filename = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.
 print(ncras_filename)
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[1]
+ccg = ccgs[0]
 test_year = 2017
 
 ncras_df = pd.read_csv(join(ncras_folder, ncras_filename)).set_index("ccg_name").loc[ccgs]
