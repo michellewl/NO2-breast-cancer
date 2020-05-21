@@ -53,17 +53,6 @@ for no2_df in no2_df_list:
     no2_test_array_list.append(no2_array)
 # print(no2_test_array_list)
 
-# no2_max_df = pd.read_csv(join(no2_folder, no2_filenames[0])).set_index("MeasurementDateGMT").loc[ncras_df.date.unique().tolist(), ccgs]
-# no2_max_df.index = pd.to_datetime(no2_max_df.index)
-# # print(no2_max_df)
-#
-# no2_mean_df = pd.read_csv(join(no2_folder, no2_filenames[1])).set_index("MeasurementDateGMT").loc[ncras_df.date.unique().tolist(), ccgs]
-# no2_mean_df.index = pd.to_datetime(no2_mean_df.index)
-# # print(no2_mean_df)
-#
-# no2_min_df = pd.read_csv(join(no2_folder, no2_filenames[2])).set_index("MeasurementDateGMT").loc[ncras_df.date.unique().tolist(), ccgs]
-# no2_min_df.index = pd.to_datetime(no2_min_df.index)
-# # print(no2_min_df)
 
 ncras_df.reset_index(inplace=True)
 ncras_df.set_index("date", inplace=True)
