@@ -9,7 +9,7 @@ sns.set(style="darkgrid")
 
 # aggregation = ["mean", "min", "max"]
 # aggregation = ["mean", "max"]
-# aggregation = ["mean"]
+aggregation = ["mean"]
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
 ccg = ccgs[1]
