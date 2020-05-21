@@ -8,7 +8,9 @@ import seaborn as sns
 sns.set(style="darkgrid")
 
 # aggregation = ["mean", "min", "max"]
-aggregation = ["mean", "max"]
+# aggregation = ["mean", "max"]
+# aggregation = ["mean"]
+
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
 ccg = ccgs[1]
 age_category = "all_ages"

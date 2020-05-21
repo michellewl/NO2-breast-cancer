@@ -8,7 +8,8 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 
 # aggregation = ["mean", "min", "max"]
-aggregation = ["mean", "max"]
+# aggregation = ["mean", "max"]
+aggregation = ["mean"]
 
 no2_folder = join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN")
 no2_filenames = [file for method in aggregation for file in listdir(no2_folder) if re.findall(f"ccgs_monthly_{method}.csv", file)]
