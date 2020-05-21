@@ -9,7 +9,10 @@ sns.set(style="darkgrid")
 
 # aggregation = ["mean", "min", "max"]
 # aggregation = ["mean", "max"]
-aggregation = ["mean"]
+# aggregation = ["mean"]
+quantile_step = 0.1  # Make this False if not using.
+aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
+print(aggregation)
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
 ccg = ccgs[1]
@@ -17,6 +20,8 @@ age_category = "all_ages"
 test_year = 2017
 
 # Load the arrays
+if quantile_step:
+    aggregation = [str(len(aggregation)-1), "quantiles"]
 load_folder = join(join(dirname(realpath(__file__)), ccg), "_".join(aggregation))
 x_train, x_test = np.load(join(load_folder, "x_train.npy")), np.load(join(load_folder, "x_test.npy"))
 y_train, y_test = np.load(join(load_folder, "y_train.npy")), np.load(join(load_folder, "y_test.npy"))
@@ -72,7 +77,7 @@ fig.tight_layout()
 fig.savefig(join(load_folder, f"time_series_{age_category}.png"), dpi=fig.dpi)
 plt.show()
 
-if len(aggregation) == 2:
+if len(aggregation) == 2 and not quantile_step:
     # Visualise linear regression model
     plt.clf()
     #scatter_fig, ax = plt.subplots(figsize=(15, 10))
