@@ -11,7 +11,10 @@ import seaborn as sns
 sns.set(style="darkgrid")
 
 # aggregation = ["mean", "min", "max"]
-aggregation = ["mean"]
+# aggregation = ["mean"]
+quantile_step = 0.25
+aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
+print(aggregation)
 
 no2_folder = join(join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN"), "monthly")
 no2_filenames = [file for method in aggregation for file in listdir(no2_folder) if re.findall(f"ccgs_monthly_{method}.csv", file)]
@@ -22,7 +25,7 @@ ncras_filename = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.
 # print(ncras_filename)
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[0]
+ccg = ccgs[1]
 test_year = 2017
 
 ncras_df = pd.read_csv(join(ncras_folder, ncras_filename)).set_index("ccg_name").loc[ccgs]
@@ -79,6 +82,10 @@ print(f"x train: {x_train.shape}"
 if not exists(ccg):
     makedirs(ccg)
 save_folder = join(dirname(realpath(__file__)), ccg)
+
+if quantile_step:
+    aggregation = [str(len(aggregation)-1), "quantiles"]
+
 save_folder = join(save_folder, "_".join(aggregation))
 if not exists(save_folder):
     makedirs(save_folder)
