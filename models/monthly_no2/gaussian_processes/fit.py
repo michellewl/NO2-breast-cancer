@@ -6,7 +6,6 @@ import re
 from sklearn.preprocessing import StandardScaler
 import joblib
 import sklearn.gaussian_process as gp
-import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="darkgrid")
 
@@ -115,13 +114,13 @@ joblib.dump(y_normaliser, join(save_folder, "y_normaliser.sav"))
 print("Fitting Gaussian process model...")
 
 # set up covariance function
-nu = 1
-sigma_init = 0.6
-lamda = np.exp(-1)
+scale_factor = 1
+noise_init = 0.6
+length_scale = np.exp(-1)
 
-kernel = "rbf_white"
-kernel_rbf_white = nu ** 2 * gp.kernels.RBF(length_scale=lamda) + gp.kernels.WhiteKernel(noise_level=sigma_init)
-kernel_init = kernel_rbf_white
+kernel = "rbf"
+kernel_rbf = scale_factor ** 2 * gp.kernels.RBF(length_scale=length_scale) + gp.kernels.WhiteKernel(noise_level=noise_init)
+kernel_init = kernel_rbf
 
 # set up GP model
 model_GP = gp.GaussianProcessRegressor(kernel=kernel_init)

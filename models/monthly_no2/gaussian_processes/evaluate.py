@@ -1,11 +1,7 @@
 import numpy as np
 import pandas as pd
-from os import listdir, makedirs
-from os.path import join, dirname, realpath, exists
-import re
-from sklearn.preprocessing import StandardScaler
+from os.path import join, dirname, realpath
 import joblib
-import sklearn.gaussian_process as gp
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="darkgrid")
@@ -16,7 +12,7 @@ quantile_step = 0.25  # Make this False if not using.
 aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
 print(aggregation)
 
-kernel = "rbf_white"
+kernel = "rbf"
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
 ccg = ccgs[1]
@@ -43,10 +39,6 @@ gp_regressor = joblib.load(join(load_folder, f"gp_regressor_{kernel}.sav"))
 
 
 # Predict the mean function with 95% confidence error bars
-# mean_fn_plotx = np.linspace(-3, 3, 500)
-# mean_fn_plotx = np.concatenate((np.arange(x_train.min(), x_train.max()).reshape(-1, 1),
-#                                         np.arange(x_train.min(), x_train.max()).reshape(-1, 1)), axis=1)
-# mu, sigma_2 = model_GP.predict(mean_fn_plotx.reshape(-1, 1), return_std=True)
 mu_train, sigma_train = gp_regressor.predict(x_train_norm, return_std=True)
 mu_test, sigma_test = gp_regressor.predict(x_test_norm, return_std=True)
 
