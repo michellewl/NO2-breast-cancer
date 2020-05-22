@@ -11,7 +11,7 @@ sns.set(style="darkgrid")
 
 # aggregation = ["mean", "min", "max"]
 # aggregation = ["mean"]
-quantile_step = 0.25
+quantile_step = 0.1
 aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
 print(aggregation)
 
@@ -24,13 +24,13 @@ ncras_filename = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.
 # print(ncras_filename)
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[1]
+ccg = ccgs[0]
 test_year = 2017
 
 ncras_df = pd.read_csv(join(ncras_folder, ncras_filename)).set_index("ccg_name").loc[ccgs]
 
 # print(ncras_df)
-###### NO2 PROCESSING
+###################### NO2 PROCESSING ##########################
 no2_df_list = []
 
 for no2_file in no2_filenames:
@@ -115,12 +115,16 @@ print("Fitting Gaussian process model...")
 
 # set up covariance function
 scale_factor = 1
-noise_init = 0.6
+noise = 0.6
 length_scale = np.exp(-1)
+scale_mixture = 1.5
 
-kernel = "rbf"
-kernel_rbf = scale_factor ** 2 * gp.kernels.RBF(length_scale=length_scale) + gp.kernels.WhiteKernel(noise_level=noise_init)
-kernel_init = kernel_rbf
+kernel = "rq"
+kernel_rbf = scale_factor ** 2 * gp.kernels.RBF(length_scale=length_scale) + gp.kernels.WhiteKernel(noise_level=noise)
+kernel_rq = scale_factor**2 * gp.kernels.RationalQuadratic(length_scale=length_scale, alpha=scale_mixture) \
+            + gp.kernels.WhiteKernel(noise_level=noise)
+
+kernel_init = kernel_rq
 
 # set up GP model
 model_GP = gp.GaussianProcessRegressor(kernel=kernel_init)
