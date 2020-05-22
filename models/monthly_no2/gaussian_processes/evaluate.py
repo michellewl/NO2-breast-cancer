@@ -16,6 +16,8 @@ quantile_step = 0.25  # Make this False if not using.
 aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
 print(aggregation)
 
+kernel = "rbf_white"
+
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
 ccg = ccgs[1]
 age_category = "all_ages"
@@ -37,7 +39,7 @@ x_train_norm, x_test_norm = x_normaliser.transform(x_train), x_normaliser.transf
 y_train_norm, y_test_norm = y_normaliser.transform(y_train), y_normaliser.transform(y_test)
 
 # Load GP regression model
-gp_regressor = joblib.load(join(load_folder, "gp_regressor.sav"))
+gp_regressor = joblib.load(join(load_folder, f"gp_regressor_{kernel}.sav"))
 
 
 # Predict the mean function with 95% confidence error bars
@@ -78,6 +80,6 @@ plt.legend(loc=1)
 fig.subplots_adjust(top=0.5)
 fig.tight_layout()
 
-fig.savefig(join(load_folder, f"time_series_{age_category}.png"), dpi=fig.dpi)
+fig.savefig(join(load_folder, f"time_series_{age_category}_{kernel}.png"), dpi=fig.dpi)
 
 plt.show()

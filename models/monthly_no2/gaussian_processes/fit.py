@@ -106,6 +106,8 @@ y_train = y_normaliser.transform(y_train)
 joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
 joblib.dump(y_normaliser, join(save_folder, "y_normaliser.sav"))
 
+############################### Gaussian process regression ###############################
+
 # Fit the Gaussian process regression model
 # Try using one dimensional input.
 # Code copied over from prev. work.
@@ -117,12 +119,14 @@ nu = 1
 sigma_init = 0.6
 lamda = np.exp(-1)
 
-kernel_init = nu ** 2 * gp.kernels.RBF(length_scale=lamda) + gp.kernels.WhiteKernel(noise_level=sigma_init)
+kernel = "rbf_white"
+kernel_rbf_white = nu ** 2 * gp.kernels.RBF(length_scale=lamda) + gp.kernels.WhiteKernel(noise_level=sigma_init)
+kernel_init = kernel_rbf_white
 
 # set up GP model
 model_GP = gp.GaussianProcessRegressor(kernel=kernel_init)
 model_GP.fit(x_train, y_train)
 
 # Save the GP model
-joblib.dump(model_GP, join(save_folder, "gp_regressor.sav"))
+joblib.dump(model_GP, join(save_folder, f"gp_regressor_{kernel}.sav"))
 print(f"Model saved.")
