@@ -9,10 +9,12 @@ import sklearn.gaussian_process as gp
 import seaborn as sns
 sns.set(style="darkgrid")
 
+kernel = "rq"
 # aggregation = ["mean", "min", "max"]
 # aggregation = ["mean"]
-quantile_step = 0.1
-aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
+quantile_step = 0.1  # Make this False if not using.
+if quantile_step:
+    aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
 print(aggregation)
 
 no2_folder = join(join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN"), "monthly")
@@ -24,7 +26,7 @@ ncras_filename = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.
 # print(ncras_filename)
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[0]
+ccg = ccgs[1]
 test_year = 2017
 
 ncras_df = pd.read_csv(join(ncras_folder, ncras_filename)).set_index("ccg_name").loc[ccgs]
@@ -119,12 +121,14 @@ noise = 0.6
 length_scale = np.exp(-1)
 scale_mixture = 1.5
 
-kernel = "rq"
 kernel_rbf = scale_factor ** 2 * gp.kernels.RBF(length_scale=length_scale) + gp.kernels.WhiteKernel(noise_level=noise)
 kernel_rq = scale_factor**2 * gp.kernels.RationalQuadratic(length_scale=length_scale, alpha=scale_mixture) \
             + gp.kernels.WhiteKernel(noise_level=noise)
 
-kernel_init = kernel_rq
+if kernel == "rbf":
+    kernel_init = kernel_rbf
+elif kernel == "rq":
+    kernel_init = kernel_rq
 
 # set up GP model
 model_GP = gp.GaussianProcessRegressor(kernel=kernel_init)
