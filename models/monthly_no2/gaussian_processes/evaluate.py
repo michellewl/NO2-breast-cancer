@@ -6,37 +6,37 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="darkgrid")
 
-# aggregation = ["mean", "min", "max"]
+kernel = "rq"
+# aggregation = ["min", "max"]
 # aggregation = ["mean"]
-quantile_step = 0.1  # Make this False if not using.
+quantile_step = False  # Make this False if not using.
+
+ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
+ccg = ccgs[0]
+age_category = "all_ages"
+test_year = 2017
+
 if quantile_step:
     aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
 print(aggregation)
-
-kernel = "rbf"
-
-ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[1]
-age_category = "all_ages"
-test_year = 2017
 
 # Load the arrays
 if quantile_step:
     aggregation = [str(len(aggregation)-1), "quantiles"]
 load_folder = join(join(dirname(realpath(__file__)), ccg), "_".join(aggregation))
 x_train, x_test = np.load(join(load_folder, "x_train.npy")), np.load(join(load_folder, "x_test.npy"))
-y_train, y_test = np.load(join(load_folder, "y_train.npy")), np.load(join(load_folder, "y_test.npy"))
+y_train, y_test = np.load(join(load_folder, f"y_{age_category}_train.npy")), np.load(join(load_folder, f"y_{age_category}_test.npy"))
 
 # Load normalisation
 x_normaliser, y_normaliser = joblib.load(join(load_folder, "x_normaliser.sav")), \
-                             joblib.load(join(load_folder, "y_normaliser.sav"))
+                             joblib.load(join(load_folder, f"y_{age_category}_normaliser.sav"))
 
 # Normalise
 x_train_norm, x_test_norm = x_normaliser.transform(x_train), x_normaliser.transform(x_test)
 y_train_norm, y_test_norm = y_normaliser.transform(y_train), y_normaliser.transform(y_test)
 
 # Load GP regression model
-gp_regressor = joblib.load(join(load_folder, f"gp_regressor_{kernel}.sav"))
+gp_regressor = joblib.load(join(load_folder, f"gp_regressor_{age_category}_{kernel}.sav"))
 
 
 # Predict the mean function with 95% confidence error bars

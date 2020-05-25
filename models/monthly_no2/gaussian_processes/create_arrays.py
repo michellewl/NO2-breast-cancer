@@ -9,10 +9,14 @@ import sklearn.gaussian_process as gp
 import seaborn as sns
 sns.set(style="darkgrid")
 
-# kernel = "rq"
-# aggregation = ["mean", "min", "max"]
+# aggregation = ["min", "max"]
 # aggregation = ["mean"]
-quantile_step = 0.1  # Make this False if not using.
+quantile_step = False  # Make this False if not using.
+
+ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
+ccg = ccgs[0]
+test_year = 2017
+
 if quantile_step:
     aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
 print(aggregation)
@@ -25,13 +29,10 @@ ncras_folder = join(join(dirname(dirname(dirname(dirname(realpath(__file__))))),
 ncras_filename = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.csv" in f][0]
 # print(ncras_filename)
 
-ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[1]
-test_year = 2017
-
 ncras_df = pd.read_csv(join(ncras_folder, ncras_filename)).set_index("ccg_name").loc[ccgs]
 
 # print(ncras_df)
+
 ###################### NO2 PROCESSING ##########################
 no2_df_list = []
 
@@ -107,8 +108,8 @@ print(save_folder)
 
 np.save(join(save_folder, "x_train"), x_train)
 np.save(join(save_folder, "x_test"), x_test)
-np.save(join(save_folder, "y_train"), y_train)
-np.save(join(save_folder, "y_test"), y_test)
+np.save(join(save_folder, f"y_{age_category}_train"), y_train)
+np.save(join(save_folder, f"y_{age_category}_test"), y_test)
 
 # Normalise input and output training data
 x_normaliser = StandardScaler().fit(x_train)
@@ -118,4 +119,4 @@ y_train = y_normaliser.transform(y_train)
 
 # Save normalisation to later apply to test sets
 joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
-joblib.dump(y_normaliser, join(save_folder, "y_normaliser.sav"))
+joblib.dump(y_normaliser, join(save_folder, f"y_{age_category}_normaliser.sav"))
