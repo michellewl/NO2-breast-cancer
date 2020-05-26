@@ -38,8 +38,8 @@ for i in inputs:
 inputs = torch.cat(inputs).view(len(inputs), 1, -1)
 hidden = (torch.randn(1, 1, 3), torch.randn(1, 1, 3))  # clean out hidden state
 out, hidden = lstm(inputs, hidden)
-print(out)
-print(hidden)
+# print(out)
+# print(hidden)
 
 # https://stackabuse.com/time-series-prediction-using-lstm-with-pytorch-in-python/
 
@@ -86,6 +86,51 @@ train_in_out_sequences = create_in_out_sequences(train_data_normalised, train_wi
 
 # Create the LSTM model, with LSTM class which inherits from nn.Module class of the PyTorch library.
 class LSTM(nn.Module):
+    # Though the sequence length is 12, for each month we have 1 dimensional value (# of passengers) so input size is 1.
+    # We specify one hidden layer with 100 neurons.
+    # Output size is 1 because we predict 1-dimensional value
     def __init__(self, input_size=1, hidden_layer_size=100, output_size=1):
         super().__init__()
-        
+        self.hidden_layer_size = hidden_layer_size
+        # Create LSTM layers
+        self.lstm = nn.LSTM(input_size, hidden_layer_size)
+        # Create linear layers
+        self.linear = nn.Linear(hidden_layer_size, output_size)
+        # Create hidden cell variable containing previous hidden state and previous cell state.
+        self.hidden_cell = (torch.zeros(1, 1, self.hidden_layer_size),
+                            torch.zeros(1, 1, self.hidden_layer_size))
+    def forward(self, input_seq):
+        # Pass input sequence through the lstm layer, which outputs the layer output, hidden state and cell state
+        # at the current time step.
+        lstm_out, self.hidden_cell = self.lstm(input_seq.view(len(input_seq), 1, -1), self.hidden_cell)
+        # Pass the lstm output to the linear layer, which calculates the dot product between
+        # the layer input and weight matrix - predicted number of passengers, in this case.
+        predictions = self.linear(lstm_out.view(len(input_seq), -1))
+        return predictions[-1]
+
+# Create model object of the LSTM class, define a loss function, define the optimiser.
+model = LSTM()
+loss_function = nn.MSELoss()
+optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
+print(f"Model:\n{model}")
+
+# Train the model for 150 epochs
+epochs = 150
+
+for i in range(epochs):
+    for sequence, labels in train_in_out_sequences:
+        # Prevent PyTorch from accumulating gradients.
+        optimiser.zero_grad()
+        model.hidden_cell = (torch.zeros(1, 1, model.hidden_layer_size),
+                             torch.zeros(1, 1, model.hidden_layer_size))
+        # Run the forward pass
+        y_predict = model(sequence)
+        # Compute the loss and gradients
+        single_loss = loss_function(y_predict, labels)
+        single_loss.backward()
+        # Update the parameters
+        optimiser.step()
+    # Print the loss after every 25 epochs
+    if i % 25 == 1:
+        print(f"epoch: {i:3} loss: {single_loss.item():10.8f}")
+print(f"epoch: {i:3} loss: {single_loss.item():10.8f}")
