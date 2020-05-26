@@ -40,7 +40,8 @@ hidden = (torch.randn(1, 1, 3), torch.randn(1, 1, 3))  # clean out hidden state
 out, hidden = lstm(inputs, hidden)
 # print(out)
 # print(hidden)
-
+#######################################################################################################################
+# Tutorial adapted from:
 # https://stackabuse.com/time-series-prediction-using-lstm-with-pytorch-in-python/
 
 # Load the tutorial data set from Seaborn

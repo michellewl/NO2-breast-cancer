@@ -6,8 +6,6 @@ import re
 from sklearn.preprocessing import StandardScaler
 import joblib
 import sklearn.gaussian_process as gp
-import seaborn as sns
-sns.set(style="darkgrid")
 
 kernel = "rq"
 # aggregation = ["min", "max"]
