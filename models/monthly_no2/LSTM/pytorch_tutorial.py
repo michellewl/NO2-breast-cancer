@@ -108,6 +108,7 @@ class LSTM(nn.Module):
         predictions = self.linear(lstm_out.view(len(input_seq), -1))
         return predictions[-1]
 
+
 # Create model object of the LSTM class, define a loss function, define the optimiser.
 model = LSTM()
 loss_function = nn.MSELoss()
@@ -115,9 +116,13 @@ optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 print(f"Model:\n{model}")
 
 # Train the model for 150 epochs
+filename = "tutorial_model.tar"
 epochs = 150
+training_loss_history =[]
 
-for i in range(epochs):
+for epoch in range(epochs):
+    model.train()
+    loss_sum = 0 # for storing
     for sequence, labels in train_in_out_sequences:
         # Prevent PyTorch from accumulating gradients.
         optimiser.zero_grad()
@@ -130,7 +135,55 @@ for i in range(epochs):
         single_loss.backward()
         # Update the parameters
         optimiser.step()
+
+        loss_sum += single_loss.item()
+        training_loss_history.append(loss_sum/len(train_in_out_sequences))
     # Print the loss after every 25 epochs
-    if i % 25 == 1:
-        print(f"epoch: {i:3} loss: {single_loss.item():10.8f}")
-print(f"epoch: {i:3} loss: {single_loss.item():10.8f}")
+    if epoch % 25 == 1:
+        print(f"epoch: {epoch:3} loss: {single_loss.item():10.8f}")
+    # Save the model after every 2 epochs
+    if epoch % 2 == 0:
+        torch.save({
+            "total_epochs": epoch,
+            "final_state_dict": model.state_dict(),
+            "optimiser_state_dict": optimiser.state_dict(),
+            "training_loss_history": training_loss_history
+        }, filename)
+print(f"epoch: {epoch:3} loss: {single_loss.item():10.8f}")
+
+# Re-load the saved model as a check point
+checkpoint = torch.load(filename)
+model.load_state_dict(checkpoint["final_state_dict"])
+print("model reloaded")
+
+# Making predictions
+# To make predictions on the test set the model uses sequence length 12,
+# so we filter the last 12 values  from the training set.
+
+future_predict = 12  # number of elements in the test set
+test_inputs = train_data_normalised[-train_window:].tolist()
+
+# The initial 12 items in test_inputs will be used to predict the first test item. The predicted value is then appended
+# to the test_inputs. This is repeated for each test prediction, taking the last 12 items in test_inputs each time.
+
+model.eval()
+
+for i in range(future_predict):
+    sequence = torch.FloatTensor(test_inputs[-train_window:])
+    with torch.no_grad():
+        model.hidden = (torch.zeros(1, 1, model.hidden_layer_size),
+                        torch.zeros(1, 1, model.hidden_layer_size))
+        test_inputs.append(model(sequence).item())
+
+test_predicted = test_inputs[future_predict:]
+# De-normalise the predicted values
+test_predicted = scaler.inverse_transform(np.array(test_predicted).reshape(-1, 1))
+
+# Plot the prediction
+plot_x = np.arange(132, 144, 1)
+fig, ax = plt.subplots()
+ax.plot(flight_data["passengers"])
+ax.plot(plot_x, test_predicted)
+fig.suptitle("Month vs Passengers")
+ax.set_ylabel("Total Passengers")
+plt.show()
