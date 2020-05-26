@@ -14,7 +14,7 @@ sns.set(style="darkgrid")
 quantile_step = 0.1  # Make this False if not using.
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[1]
+ccg = ccgs[0]
 test_year = 2017
 
 if quantile_step:
