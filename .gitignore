@@ -8,5 +8,6 @@
 *.csv
 *.npy
 *.sav
+*.tar
 
 
