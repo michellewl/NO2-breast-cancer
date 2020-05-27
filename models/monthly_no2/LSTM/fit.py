@@ -52,22 +52,32 @@ print(f"x train: {x_train.shape}"
       f"\ny test: {y_test.shape}")
 
 # Normalise input and output training data
-x_train = x_normaliser.transform(x_train)
-y_train = y_normaliser.transform(y_train)
+x_train_norm = x_normaliser.transform(x_train)
+y_train_norm = y_normaliser.transform(y_train)
 
-exit()
 # LSTM model
 
 # Convert dataset to PyTorch tensors
-
-
+x_train_norm = torch.from_numpy(x_train_norm)
+y_train_norm = torch.from_numpy(y_train_norm)
+print(f"x train: {x_train_norm.shape}"
+      f"\ny train: {y_train_norm.shape}")
 
 # Define function to produce the xy sequences.
 
 def create_xy_sequences(x_array, y_array, tw):
     xy_sequence = []
-    for i in range(len(x_array)):
+    for i in range(len(y_array)):
         train_sequence = x_array[i:i+tw]
         train_target = y_array[i]
         xy_sequence.append((train_sequence, train_target))
     return xy_sequence
+
+training_sequences = create_xy_sequences(x_train_norm, y_train_norm, training_window)
+# print(training_sequences[0])
+
+# Create the LSTM model
+
+class LSTM(nn.Module):
+    def __init__(self, input_size, hidden_layer_size, output_size=1):
+        
