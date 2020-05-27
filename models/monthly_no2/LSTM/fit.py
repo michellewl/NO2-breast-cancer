@@ -87,7 +87,7 @@ ncras_df.index = pd.to_datetime(ncras_df.index)
 ncras_start_date, ncras_end_date = ncras_df.index.min(), ncras_df.index.max()
 no2_start_training_date, no2_end_training_date = ncras_start_date - relativedelta(months=training_window), \
                                ncras_end_date - relativedelta(months=1, years=1)
-no2_start_test_date, no2_end_test_date = ncras_end_date - relativedelta(months=3, years=1), ncras_end_date - relativedelta(months=1)
+no2_start_test_date, no2_end_test_date = ncras_end_date - relativedelta(months=training_window, years=1), ncras_end_date - relativedelta(months=1)
 print(ncras_start_date, no2_start_training_date, no2_end_training_date)
 print(ncras_end_date, no2_start_test_date, no2_end_test_date)
 
@@ -120,10 +120,12 @@ no2_training_array_list.append(training_dates_array)
 no2_test_array_list.append(test_dates_array)
 
 for no2_df in no2_df_list:
-    no2_array = no2_df.loc[no2_df.index.year != test_year, ccg].values.reshape(-1, 1)
+    no2_array = no2_df.loc[(no2_df.index >= no2_start_training_date) & (no2_df.index <= no2_end_training_date),
+                           ccg].values.reshape(-1, 1)
     no2_training_array_list.append(no2_array)
 
-    no2_array = no2_df.loc[no2_df.index.year == test_year, ccg].values.reshape(-1, 1)
+    no2_array = no2_df.loc[(no2_df.index >= no2_start_test_date) &
+                                          (no2_df.index <= no2_end_test_date), ccg].values.reshape(-1, 1)
     no2_test_array_list.append(no2_array)
 # print(no2_training_array_list)
 # print(no2_test_array_list)
