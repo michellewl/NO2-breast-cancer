@@ -68,8 +68,8 @@ print(f"x train: {x_train_norm.shape}"
 def create_xy_sequences(x_array, y_array, tw):
     xy_sequence = []
     for i in range(len(y_array)):
-        train_sequence = x_array[i:i+tw]
-        train_target = y_array[i]
+        train_sequence = x_array[i:i+tw].float()
+        train_target = y_array[i].float()
         xy_sequence.append((train_sequence, train_target))
     return xy_sequence
 
@@ -80,4 +80,67 @@ training_sequences = create_xy_sequences(x_train_norm, y_train_norm, training_wi
 
 class LSTM(nn.Module):
     def __init__(self, input_size, hidden_layer_size, output_size=1):
-        
+        super().__init__()  # runs init for the Module parent class
+        self.hidden_layer_size = hidden_layer_size
+        self.lstm = nn.LSTM(input_size, hidden_layer_size)  # LSTM layers
+        self.linear = nn.Linear(hidden_layer_size, output_size)  # Linear layers
+        # Hidden cell variable contains previous hidden state and previous cell state.
+        self.hidden_cell = (torch.zeros(1, 1, self.hidden_layer_size),
+                            torch.zeros(1, 1, self.hidden_layer_size))
+
+    def forward(self, input_seq):
+        # Pass input sequence through the lstm layer, which outputs the layer output, hidden state and cell state
+        # at the current time step.
+        lstm_out, self.hidden_cell = self.lstm(input_seq.view(len(input_seq), 1, -1), self.hidden_cell)
+        # Pass the lstm output to the linear layer, which calculates the dot product between
+        # the layer input and weight matrix.
+        predictions = self.linear(lstm_out.view(len(input_seq), -1))
+        return predictions[-1]
+
+
+# Create model object of the LSTM class, define a loss function, define the optimiser.
+model = LSTM(input_size=x_train_norm.shape[1], hidden_layer_size=100, output_size=y_train_norm.shape[1])
+criterion = nn.MSELoss()
+optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
+print(f"Model:\n{model}")
+
+# Train the LSTM model
+filename = "lstm_model.tar"
+save_path = join(load_folder, filename)
+torch.manual_seed(1)
+
+num_epochs = 150
+training_loss_history = []
+# Currently no batches or validation set.
+
+print("Begin training...")
+for epoch in range(num_epochs):
+    model.train()
+    loss_sum = 0  # for storing
+    for sequence, target in training_sequences:
+        optimiser.zero_grad()
+        model.hidden_cell = (torch.zeros(1, 1, model.hidden_layer_size),
+                             torch.zeros(1, 1, model.hidden_layer_size))
+        # Run the forward pass
+        y_predict = model(sequence)
+        # Compute the loss and gradients
+        single_loss = criterion(y_predict, target)
+        single_loss.backward()
+        # Update the parameters
+        optimiser.step()
+
+        loss_sum += single_loss.item()
+        training_loss_history.append(loss_sum / len(training_sequences))
+        # Print the loss after every 25 epochs
+    if epoch % 25 == 0:
+        print(f"epoch: {epoch:3} loss: {single_loss.item():10.8f}")
+        # Save the model after every 2 epochs
+    if epoch % 5 == 0:
+        torch.save({
+            "total_epochs": epoch,
+            "final_state_dict": model.state_dict(),
+            "optimiser_state_dict": optimiser.state_dict(),
+            "training_loss_history": training_loss_history
+        }, save_path)
+print(f"epoch: {epoch:3} loss: {single_loss.item():10.8f}")
+
