@@ -17,6 +17,8 @@ import joblib
 import datetime as dt
 from dateutil.relativedelta import relativedelta
 from copy import deepcopy
+from dataset import NO2Dataset
+from torch.utils.data import DataLoader
 
 training_window = 3  # consider the last X months of NO2 for each breast cancer diagnosis month
 
@@ -89,14 +91,30 @@ np.save(join(save_folder, "validation_sequences.npy"), validation_sequences)
 np.save(join(save_folder, "training_targets.npy"), training_targets)
 np.save(join(save_folder, "validation_targets.npy"), validation_targets)
 
-exit()
+
 # Create the LSTM model
+
+batch_size = 14
+num_epochs = 1000
+batches_per_print = 500
+torch.manual_seed(1)
+
+train_seq_path = join(save_folder, "training_sequences.npy")
+train_target_path = join(save_folder, "training_targets.npy")
+val_seq_path = join(save_folder, "validation_sequences.npy")
+val_target_path = join(save_folder, "validation_targets.npy")
+
+training_dataset = NO2Dataset(train_seq_path, train_target_path)
+validation_dataset = NO2Dataset(val_seq_path, val_target_path)
+
+training_dataloader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True)
+validation_dataloader = DataLoader(validation_dataset, batch_size=batch_size, shuffle=True)
 
 class LSTM(nn.Module):
     def __init__(self, input_size, hidden_layer_size, output_size=1):
         super().__init__()  # runs init for the Module parent class
         self.hidden_layer_size = hidden_layer_size
-        self.lstm = nn.LSTM(input_size, hidden_layer_size)  # LSTM layers
+        self.lstm = nn.LSTM(input_size, hidden_layer_size, batch_first=True)  # LSTM layers
         self.linear = nn.Linear(hidden_layer_size, output_size)  # Linear layers
         # Hidden cell variable contains previous hidden state and previous cell state.
         # self.hidden_cell = (torch.zeros(1, 1, self.hidden_layer_size),
@@ -105,15 +123,18 @@ class LSTM(nn.Module):
     def forward(self, input_seq):
         # Pass input sequence through the lstm layer, which outputs the layer output, hidden state and cell state
         # at the current time step.
-        lstm_out, _ = self.lstm(input_seq.view(len(input_seq), 1, -1))#, self.hidden_cell)
+
+        lstm_out, hidden_state_cell_state = self.lstm(input_seq)#, self.hidden_cell)
+        # print(lstm_out.shape, hidden_state_cell_state[0].shape, hidden_state_cell_state[1].shape)
         # Pass the lstm output to the linear layer, which calculates the dot product between
         # the layer input and weight matrix.
-        predictions = self.linear(lstm_out.view(len(input_seq), -1))
-        return predictions[-1]
+        prediction = self.linear(lstm_out[:, -1, :])  # We want the most recent hidden state
+        # print(prediction.shape)
+        return prediction.squeeze()
 
 
 # Create model object of the LSTM class, define a loss function, define the optimiser.
-model = LSTM(input_size=x_train_norm.shape[1], hidden_layer_size=100, output_size=y_train_norm.shape[1])
+model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=100)
 criterion = nn.MSELoss()
 optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 print(f"Model:\n{model}")
@@ -121,9 +142,7 @@ print(f"Model:\n{model}")
 # Train the LSTM model
 filename = "lstm_model.tar"
 save_path = join(load_folder, filename)
-torch.manual_seed(1)
 
-num_epochs = 1000
 training_loss_history = []
 validation_loss_history = []
 # Currently no batches or validation set.
@@ -132,37 +151,47 @@ print("Begin training...")
 for epoch in range(num_epochs):
     model.train()
     loss_sum = 0  # for storing
-    for sequence, target in training_sequences:
+    running_loss = 0.0  # for printing
+
+    for batch_num, data in enumerate(training_dataloader):
+        print(batch_num)
+        sequences_training = data["sequences"]
+        targets_training = data["targets"]
         optimiser.zero_grad()
         # model.hidden_cell = (torch.zeros(1, 1, model.hidden_layer_size),  # Set to zero
         #                      torch.zeros(1, 1, model.hidden_layer_size))
         # Run the forward pass
-        y_predict = model(sequence)
+        y_predict = model(sequences_training)
         # Compute the loss and gradients
-        single_loss = criterion(y_predict, target)
+        single_loss = criterion(y_predict, targets_training)
         single_loss.backward()
         # Update the parameters
         optimiser.step()
 
-        loss_sum += single_loss.item()
-    training_loss_history.append(loss_sum / len(training_sequences))  # Save the training loss after every epoch
-    # Print the loss after every 25 epochs
-    if epoch % 25 == 0:
-        print(f"epoch: {epoch:3} loss: {single_loss.item():10.8f}")
+        running_loss += single_loss.item()
+        loss_sum += single_loss.item()*batch_size
 
+    # Print the loss after every 25 epochs
+        if batch_num % batches_per_print == 0:
+            print(f"epoch: {epoch:3} batch {batch_num} loss: {running_loss/batches_per_print:10.8f}")
+            running_loss = 0.0
+    training_loss_history.append(loss_sum / len(training_dataset))  # Save the training loss after every epoch
     # Validation set
     model.eval()
     validation_loss_sum = 0
     with torch.no_grad():
-        for sequence, target in validation_sequences:
-            y_predict_validation = model(sequence)
-            single_loss = criterion(y_predict_validation, target)
-            validation_loss_sum += single_loss.item()
+        for batch_num, data in enumerate(validation_dataloader):
+            sequences_val = data["sequences"]
+            targets_val = data["targets"]
+            y_predict_validation = model(sequences_val)
+            single_loss = criterion(y_predict_validation, targets_val)
+            validation_loss_sum += single_loss.item()*batch_size
     # Store the model with smallest validation loss. Check if the validation loss is the lowest BEFORE
     # saving it to loss history (otherwise it will not be lower than itself)
-    if not validation_loss_history or validation_loss_sum / len(validation_sequences) < min(validation_loss_history):
+    if (not validation_loss_history) or validation_loss_sum / len(validation_sequences) < min(validation_loss_history):
         best_model = deepcopy(model.state_dict())
         best_epoch = epoch
+    print(f"Epoch {epoch} validation loss: {validation_loss_sum / len(validation_sequences)}")
     validation_loss_history.append(validation_loss_sum / len(validation_sequences))  # Save the val loss every epoch.
 
         # Save the model after every 2 epochs

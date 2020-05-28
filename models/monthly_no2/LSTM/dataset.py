@@ -20,6 +20,6 @@ class NO2Dataset(Dataset):
     def __getitem__(self, index):
         input = self.inputs[index]
         target = self.targets[index]
-        return {"inputs": input, "targets": target}
+        return {"sequences": input, "targets": target}
 
 
