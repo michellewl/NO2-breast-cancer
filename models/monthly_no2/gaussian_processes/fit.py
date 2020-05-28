@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 import sklearn.gaussian_process as gp
 
-kernel = "rq"
+kernel = "rbf"
 # aggregation = ["min", "max"]
 # aggregation = ["mean"]
 quantile_step = False  # Make this False if not using.
