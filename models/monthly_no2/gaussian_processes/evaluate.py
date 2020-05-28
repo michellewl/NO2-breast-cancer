@@ -12,7 +12,7 @@ kernel = "rq"
 quantile_step = False  # Make this False if not using.
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[0]
+ccg = ccgs[1]
 age_category = "all_ages"
 test_year = 2017
 
