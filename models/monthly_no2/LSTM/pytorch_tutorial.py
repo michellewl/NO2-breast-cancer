@@ -138,7 +138,7 @@ for epoch in range(epochs):
         optimiser.step()
 
         loss_sum += single_loss.item()
-        training_loss_history.append(loss_sum/len(train_in_out_sequences))
+    training_loss_history.append(loss_sum/len(train_in_out_sequences))
     # Print the loss after every 25 epochs
     if epoch % 25 == 1:
         print(f"epoch: {epoch:3} loss: {single_loss.item():10.8f}")

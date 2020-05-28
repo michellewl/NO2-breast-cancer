@@ -16,6 +16,7 @@ from sklearn.model_selection import train_test_split
 import joblib
 import datetime as dt
 from dateutil.relativedelta import relativedelta
+from copy import deepcopy
 
 training_window = 3  # consider the last X months of NO2 for each breast cancer diagnosis month
 
@@ -55,32 +56,40 @@ print(f"Data loaded:"
 
 # Normalise input and output training data
 x_train_norm = x_normaliser.transform(x_train)
-y_train_norm = y_normaliser.transform(y_train)
+y_train_norm = y_normaliser.transform(y_train).squeeze()
 
 # LSTM model
 
 # Convert dataset to PyTorch tensors
-x_train_norm = torch.from_numpy(x_train_norm)
-y_train_norm = torch.from_numpy(y_train_norm)
+# x_train_norm = torch.from_numpy(x_train_norm)
+# y_train_norm = torch.from_numpy(y_train_norm)
 # print(f"x train: {x_train_norm.shape}"
 #       f"\ny train: {y_train_norm.shape}")
 
 # Define function to produce the xy sequences.
 
-def create_xy_sequences(x_array, y_array, tw):
-    xy_sequence = []
-    for i in range(len(y_array)):
-        train_sequence = x_array[i:i+tw].float()
-        train_target = y_array[i].float()
-        xy_sequence.append((train_sequence, train_target))
-    return xy_sequence
+def create_x_sequences(x_array, num_sequences, tw):
+    input_sequences = []
+    for i in range(num_sequences):
+        train_sequence = x_array[i:i+tw]
+        input_sequences.append(train_sequence)
+    input_sequences = np.stack(input_sequences, axis=0)
+    return input_sequences
 
-training_sequences = create_xy_sequences(x_train_norm, y_train_norm, training_window)
-
+train_val_inputs = create_x_sequences(x_train_norm, len(y_train_norm), training_window)
+print(train_val_inputs.shape, y_train_norm.shape)
 validation_size = 0.2
-training_sequences, validation_sequences = train_test_split(training_sequences, test_size=validation_size, random_state=1)
-print(f"Training sequences {len(training_sequences)}\nValidation sequences {len(validation_sequences)}")
+training_sequences, validation_sequences, training_targets, validation_targets = train_test_split(train_val_inputs, y_train_norm, test_size=validation_size, random_state=1)
+print(f"Training sequences {training_sequences.shape}\nValidation sequences {validation_sequences.shape}")
+print(f"Training targets {training_targets.shape}\nValidation targets {validation_targets.shape}")
 
+save_folder = load_folder
+np.save(join(save_folder, "training_sequences.npy"), training_sequences)
+np.save(join(save_folder, "validation_sequences.npy"), validation_sequences)
+np.save(join(save_folder, "training_targets.npy"), training_targets)
+np.save(join(save_folder, "validation_targets.npy"), validation_targets)
+
+exit()
 # Create the LSTM model
 
 class LSTM(nn.Module):
@@ -114,7 +123,7 @@ filename = "lstm_model.tar"
 save_path = join(load_folder, filename)
 torch.manual_seed(1)
 
-num_epochs = 150
+num_epochs = 1000
 training_loss_history = []
 validation_loss_history = []
 # Currently no batches or validation set.
@@ -136,8 +145,12 @@ for epoch in range(num_epochs):
         optimiser.step()
 
         loss_sum += single_loss.item()
-    training_loss_history.append(loss_sum / len(training_sequences))
+    training_loss_history.append(loss_sum / len(training_sequences))  # Save the training loss after every epoch
+    # Print the loss after every 25 epochs
+    if epoch % 25 == 0:
+        print(f"epoch: {epoch:3} loss: {single_loss.item():10.8f}")
 
+    # Validation set
     model.eval()
     validation_loss_sum = 0
     with torch.no_grad():
@@ -145,17 +158,24 @@ for epoch in range(num_epochs):
             y_predict_validation = model(sequence)
             single_loss = criterion(y_predict_validation, target)
             validation_loss_sum += single_loss.item()
-        validation_loss_history.append(validation_loss_sum / len(validation_sequences))
-        # Print the loss after every 25 epochs
-    if epoch % 25 == 0:
-        print(f"epoch: {epoch:3} loss: {single_loss.item():10.8f}")
+    # Store the model with smallest validation loss. Check if the validation loss is the lowest BEFORE
+    # saving it to loss history (otherwise it will not be lower than itself)
+    if not validation_loss_history or validation_loss_sum / len(validation_sequences) < min(validation_loss_history):
+        best_model = deepcopy(model.state_dict())
+        best_epoch = epoch
+    validation_loss_history.append(validation_loss_sum / len(validation_sequences))  # Save the val loss every epoch.
+
         # Save the model after every 2 epochs
-    if epoch % 5 == 0:
+    if epoch % 2 == 0:
         torch.save({
             "total_epochs": epoch,
             "final_state_dict": model.state_dict(),
             "optimiser_state_dict": optimiser.state_dict(),
-            "training_loss_history": training_loss_history
+            "training_loss_history": training_loss_history,
+            "best_state_dict": best_model,
+            "best_epoch": best_epoch,
+            "validation_loss_history": validation_loss_history
         }, save_path)
-print(f"epoch: {epoch:3} loss: {single_loss.item():10.8f}")
+
+print(f"Finished training for {num_epochs} epochs.")
 
