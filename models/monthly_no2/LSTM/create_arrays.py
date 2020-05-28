@@ -17,6 +17,8 @@ ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
 ccg = ccgs[0]
 test_year = 2017
 
+dates_as_inputs = False
+
 if quantile_step:
     aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
 print(aggregation)
@@ -57,19 +59,20 @@ for no2_file in no2_filenames:
 no2_training_array_list = []
 no2_test_array_list = []
 
-input_dates_df = pd.DataFrame(index=no2_df_list[0].index)
-input_dates_df["year"] = input_dates_df.index.year
-input_dates_df["month_sin"] = np.sin(np.deg2rad((360/12) * input_dates_df.index.month))
-input_dates_df["month_cos"] = np.cos(np.deg2rad((360/12) * input_dates_df.index.month))
-training_dates_array = input_dates_df.loc[(input_dates_df.index >= no2_start_training_date) &
-                                          (input_dates_df.index <= no2_end_training_date),
-                                          ("year", "month_sin", "month_cos")].values.reshape(-1, 3)
-test_dates_array = input_dates_df.loc[(input_dates_df.index >= no2_start_test_date) &
-                                          (input_dates_df.index <= no2_end_test_date), ("year", "month_sin", "month_cos")].values.reshape(-1, 3)
-# print(training_dates_array)
+if dates_as_inputs:
+    input_dates_df = pd.DataFrame(index=no2_df_list[0].index)
+    input_dates_df["year"] = input_dates_df.index.year
+    input_dates_df["month_sin"] = np.sin(np.deg2rad((360/12) * input_dates_df.index.month))
+    input_dates_df["month_cos"] = np.cos(np.deg2rad((360/12) * input_dates_df.index.month))
+    training_dates_array = input_dates_df.loc[(input_dates_df.index >= no2_start_training_date) &
+                                              (input_dates_df.index <= no2_end_training_date),
+                                              ("year", "month_sin", "month_cos")].values.reshape(-1, 3)
+    test_dates_array = input_dates_df.loc[(input_dates_df.index >= no2_start_test_date) &
+                                              (input_dates_df.index <= no2_end_test_date), ("year", "month_sin", "month_cos")].values.reshape(-1, 3)
+    # print(training_dates_array)
 
-no2_training_array_list.append(training_dates_array)
-no2_test_array_list.append(test_dates_array)
+    no2_training_array_list.append(training_dates_array)
+    no2_test_array_list.append(test_dates_array)
 
 for no2_df in no2_df_list:
     no2_array = no2_df.loc[(no2_df.index >= no2_start_training_date) & (no2_df.index <= no2_end_training_date),
