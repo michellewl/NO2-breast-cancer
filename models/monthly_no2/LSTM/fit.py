@@ -90,13 +90,13 @@ class LSTM(nn.Module):
         self.lstm = nn.LSTM(input_size, hidden_layer_size)  # LSTM layers
         self.linear = nn.Linear(hidden_layer_size, output_size)  # Linear layers
         # Hidden cell variable contains previous hidden state and previous cell state.
-        self.hidden_cell = (torch.zeros(1, 1, self.hidden_layer_size),
-                            torch.zeros(1, 1, self.hidden_layer_size))
+        # self.hidden_cell = (torch.zeros(1, 1, self.hidden_layer_size),
+        #                     torch.zeros(1, 1, self.hidden_layer_size))
 
     def forward(self, input_seq):
         # Pass input sequence through the lstm layer, which outputs the layer output, hidden state and cell state
         # at the current time step.
-        lstm_out, self.hidden_cell = self.lstm(input_seq.view(len(input_seq), 1, -1), self.hidden_cell)
+        lstm_out, _ = self.lstm(input_seq.view(len(input_seq), 1, -1))#, self.hidden_cell)
         # Pass the lstm output to the linear layer, which calculates the dot product between
         # the layer input and weight matrix.
         predictions = self.linear(lstm_out.view(len(input_seq), -1))
@@ -125,8 +125,8 @@ for epoch in range(num_epochs):
     loss_sum = 0  # for storing
     for sequence, target in training_sequences:
         optimiser.zero_grad()
-        model.hidden_cell = (torch.zeros(1, 1, model.hidden_layer_size),
-                             torch.zeros(1, 1, model.hidden_layer_size))
+        # model.hidden_cell = (torch.zeros(1, 1, model.hidden_layer_size),  # Set to zero
+        #                      torch.zeros(1, 1, model.hidden_layer_size))
         # Run the forward pass
         y_predict = model(sequence)
         # Compute the loss and gradients
@@ -136,7 +136,16 @@ for epoch in range(num_epochs):
         optimiser.step()
 
         loss_sum += single_loss.item()
-        training_loss_history.append(loss_sum / len(training_sequences))
+    training_loss_history.append(loss_sum / len(training_sequences))
+
+    model.eval()
+    validation_loss_sum = 0
+    with torch.no_grad():
+        for sequence, target in validation_sequences:
+            y_predict_validation = model(sequence)
+            single_loss = criterion(y_predict_validation, target)
+            validation_loss_sum += single_loss.item()
+        validation_loss_history.append(validation_loss_sum / len(validation_sequences))
         # Print the loss after every 25 epochs
     if epoch % 25 == 0:
         print(f"epoch: {epoch:3} loss: {single_loss.item():10.8f}")
