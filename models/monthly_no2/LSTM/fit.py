@@ -12,6 +12,7 @@ from os import listdir, makedirs
 from os.path import join, dirname, realpath, exists
 import re
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 import joblib
 import datetime as dt
 from dateutil.relativedelta import relativedelta
@@ -46,10 +47,11 @@ x_normaliser, y_normaliser = joblib.load(join(load_folder, "x_normaliser.sav")),
                              joblib.load(join(load_folder, f"y_{age_category}_normaliser.sav"))
 
 
-print(f"x train: {x_train.shape}"
-      f"\ny train: {y_train.shape}"
-      f"\nx test: {x_test.shape}"
-      f"\ny test: {y_test.shape}")
+print(f"Data loaded:"
+      f"\nx train {x_train.shape}"
+      f"\ny train {y_train.shape}"
+      f"\nx test {x_test.shape}"
+      f"\ny test {y_test.shape}")
 
 # Normalise input and output training data
 x_train_norm = x_normaliser.transform(x_train)
@@ -60,8 +62,8 @@ y_train_norm = y_normaliser.transform(y_train)
 # Convert dataset to PyTorch tensors
 x_train_norm = torch.from_numpy(x_train_norm)
 y_train_norm = torch.from_numpy(y_train_norm)
-print(f"x train: {x_train_norm.shape}"
-      f"\ny train: {y_train_norm.shape}")
+# print(f"x train: {x_train_norm.shape}"
+#       f"\ny train: {y_train_norm.shape}")
 
 # Define function to produce the xy sequences.
 
@@ -74,7 +76,10 @@ def create_xy_sequences(x_array, y_array, tw):
     return xy_sequence
 
 training_sequences = create_xy_sequences(x_train_norm, y_train_norm, training_window)
-# print(training_sequences[0])
+
+validation_size = 0.2
+training_sequences, validation_sequences = train_test_split(training_sequences, test_size=validation_size, random_state=1)
+print(f"Training sequences {len(training_sequences)}\nValidation sequences {len(validation_sequences)}")
 
 # Create the LSTM model
 
@@ -111,6 +116,7 @@ torch.manual_seed(1)
 
 num_epochs = 150
 training_loss_history = []
+validation_loss_history = []
 # Currently no batches or validation set.
 
 print("Begin training...")
