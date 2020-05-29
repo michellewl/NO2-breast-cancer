@@ -1,21 +1,9 @@
-from os.path import join, dirname, realpath
-import joblib
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import seaborn as sns
 import numpy as np
-import numpy as np
-import pandas as pd
-from os import listdir, makedirs
-from os.path import join, dirname, realpath, exists
-import re
-from sklearn.preprocessing import StandardScaler
+from os.path import join, dirname, realpath
 from sklearn.model_selection import train_test_split
 import joblib
-import datetime as dt
-from dateutil.relativedelta import relativedelta
 from copy import deepcopy
 from dataset import NO2Dataset
 from torch.utils.data import DataLoader
@@ -27,7 +15,7 @@ training_window = 3  # consider the last X months of NO2 for each breast cancer 
 quantile_step = 0.1  # Make this False if not using.
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[0]
+ccg = ccgs[1]
 test_year = 2017
 
 if quantile_step:
@@ -50,11 +38,11 @@ x_normaliser, y_normaliser = joblib.load(join(load_folder, "x_normaliser.sav")),
                              joblib.load(join(load_folder, f"y_{age_category}_normaliser.sav"))
 
 
-print(f"Data loaded:"
-      f"\nx train {x_train.shape}"
-      f"\ny train {y_train.shape}"
-      f"\nx test {x_test.shape}"
-      f"\ny test {y_test.shape}")
+# print(f"Data loaded:"
+#       f"\nx train {x_train.shape}"
+#       f"\ny train {y_train.shape}"
+#       f"\nx test {x_test.shape}"
+#       f"\ny test {y_test.shape}")
 
 # Normalise input and output training data
 x_train_norm = x_normaliser.transform(x_train)
@@ -79,7 +67,7 @@ def create_x_sequences(x_array, num_sequences, tw):
     return input_sequences
 
 train_val_inputs = create_x_sequences(x_train_norm, len(y_train_norm), training_window)
-print(train_val_inputs.shape, y_train_norm.shape)
+# print(train_val_inputs.shape, y_train_norm.shape)
 validation_size = 0.2
 training_sequences, validation_sequences, training_targets, validation_targets = train_test_split(train_val_inputs, y_train_norm, test_size=validation_size, random_state=1)
 print(f"Training sequences {training_sequences.shape}\nValidation sequences {validation_sequences.shape}")
@@ -96,7 +84,8 @@ np.save(join(save_folder, "validation_targets.npy"), validation_targets)
 
 batch_size = 14
 num_epochs = 1000
-batches_per_print = 500
+# batches_per_print = 500
+epochs_per_print = 500
 torch.manual_seed(1)
 
 train_seq_path = join(save_folder, "training_sequences.npy")
@@ -151,10 +140,10 @@ print("Begin training...")
 for epoch in range(num_epochs):
     model.train()
     loss_sum = 0  # for storing
-    running_loss = 0.0  # for printing
+    # running_loss = 0.0  # for printing
 
     for batch_num, data in enumerate(training_dataloader):
-        print(batch_num)
+        # print(batch_num)
         sequences_training = data["sequences"]
         targets_training = data["targets"]
         optimiser.zero_grad()
@@ -168,13 +157,15 @@ for epoch in range(num_epochs):
         # Update the parameters
         optimiser.step()
 
-        running_loss += single_loss.item()
+        # running_loss += single_loss.item()
         loss_sum += single_loss.item()*batch_size
 
     # Print the loss after every 25 epochs
-        if batch_num % batches_per_print == 0:
-            print(f"epoch: {epoch:3} batch {batch_num} loss: {running_loss/batches_per_print:10.8f}")
-            running_loss = 0.0
+    #     if batch_num % batches_per_print == 0:
+    #         print(f"epoch: {epoch:3} batch {batch_num} loss: {running_loss/batches_per_print:10.8f}")
+    #         running_loss = 0.0
+    if epoch % epochs_per_print == 0 :
+        print(f"Epoch {epoch} training loss: {loss_sum / len(training_dataset)}")
     training_loss_history.append(loss_sum / len(training_dataset))  # Save the training loss after every epoch
     # Validation set
     model.eval()
@@ -191,7 +182,7 @@ for epoch in range(num_epochs):
     if (not validation_loss_history) or validation_loss_sum / len(validation_sequences) < min(validation_loss_history):
         best_model = deepcopy(model.state_dict())
         best_epoch = epoch
-    print(f"Epoch {epoch} validation loss: {validation_loss_sum / len(validation_sequences)}")
+        # print(f"Epoch {epoch} validation loss: {validation_loss_sum / len(validation_sequences)}")
     validation_loss_history.append(validation_loss_sum / len(validation_sequences))  # Save the val loss every epoch.
 
         # Save the model after every 2 epochs
