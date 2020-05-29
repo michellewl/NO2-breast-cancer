@@ -108,63 +108,27 @@ y_test = ncras_df.loc[(ncras_df.index.year == test_year) & (ncras_df.ccg_name ==
 #       f"\nx test: {x_test.shape}"
 #       f"\ny test: {y_test.shape}")
 
-# Save the arrays
-# if not exists(ccg):
-#     makedirs(ccg)
-# save_folder =
-
+# Save folder
 if quantile_step:
     aggregation = [str(len(aggregation)-1), "quantiles"]
-
-# save_folder =
-# if not exists(save_folder):
-#     makedirs(save_folder)
 
 save_folder = join(join(join(dirname(realpath(__file__)), ccg), "_".join(aggregation)), f"{training_window}_month_tw")
 if not exists(save_folder):
     makedirs(save_folder)
 
-# np.save(join(save_folder, "x_train"), x_train)
-# np.save(join(save_folder, "x_test"), x_test)
-# np.save(join(save_folder, f"y_{age_category}_train"), y_train)
-# np.save(join(save_folder, f"y_{age_category}_test"), y_test)
-
-# Normalise input and output training data
+# Normaliser
 x_normaliser = StandardScaler().fit(x_train)
-# x_train = x_normaliser.transform(x_train)
 y_normaliser = StandardScaler().fit(y_train)
-# y_train = y_normaliser.transform(y_train)
-
 # Save normalisation to later apply to test sets
 joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
 joblib.dump(y_normaliser, join(save_folder, f"y_{age_category}_normaliser.sav"))
-
 # print(f"Saved normaliser to {save_folder}")
 
-##############################################################################################################
-# From fit.py
-# quantile_step = 0.1  # Make this False if not using.
-# test_year = 2017
-
-# if quantile_step:
-#     aggregation = [str(len(aggregation)-1), "quantiles"]
-# load_folder = join(join(join(dirname(realpath(__file__)), ccg), "_".join(aggregation)), f"{training_window}_month_tw")
-
-# Load the arrays
-# x_train, x_test = np.load(join(save_folder, "x_train.npy")), np.load(join(save_folder, "x_test.npy"))
-# y_train, y_test = np.load(join(load_folder, f"y_{age_category}_train.npy")), np.load(join(load_folder, f"y_{age_category}_test.npy"))
-
-# Load normalisation
-# x_normaliser, y_normaliser = joblib.load(join(load_folder, "x_normaliser.sav")), \
-#                              joblib.load(join(load_folder, f"y_{age_category}_normaliser.sav"))
-
-
-# Normalise input and output training data
+# Normalise input and output data
 x_train_norm = x_normaliser.transform(x_train)
 y_train_norm = y_normaliser.transform(y_train).squeeze()
 x_test_norm = x_normaliser.transform(x_test)
 y_test_norm = y_normaliser.transform(y_test).squeeze()
-
 
 # Define function to produce the x sequences.
 
@@ -176,9 +140,12 @@ def create_x_sequences(x_array, num_sequences, tw):
     input_sequences = np.stack(input_sequences, axis=0)
     return input_sequences
 
+
 train_val_inputs = create_x_sequences(x_train_norm, len(y_train_norm), training_window)
 test_inputs = create_x_sequences(x_test_norm, len(y_test_norm), training_window)
 # print(train_val_inputs.shape, y_train_norm.shape)
+
+# Split the training and validation sets
 validation_size = 0.2
 training_sequences, validation_sequences, training_targets, validation_targets = train_test_split(train_val_inputs, y_train_norm, test_size=validation_size, random_state=1)
 print(f"\nTraining sequences {training_sequences.shape}\nValidation sequences {validation_sequences.shape}")
