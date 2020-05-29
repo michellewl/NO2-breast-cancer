@@ -36,7 +36,7 @@ load_folder = join(join(join(dirname(realpath(__file__)), ccg), "_".join(aggrega
 batch_size = 14
 num_epochs = 1000
 batches_per_print = False
-epochs_per_print = 500
+epochs_per_print = 50
 torch.manual_seed(1)
 
 train_seq_path = join(load_folder, "training_sequences.npy")
