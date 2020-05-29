@@ -17,21 +17,15 @@ quantile_step = 0.1  # Make this False if not using.
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
 ccg = ccgs[0]
 
-if quantile_step:
-    aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
-print(aggregation)
-
 # One age category
 age_category = "all_ages"
 print(f"{ccg}\n{age_category}")
 
 
 if quantile_step:
-    aggregation = [str(len(aggregation)-1), "quantiles"]
-load_folder = join(join(join(dirname(realpath(__file__)), ccg), "_".join(aggregation)), f"{training_window}_month_tw")
+    aggregation = f"{int(1/quantile_step)}_quantiles"
+load_folder = join(join(join(dirname(realpath(__file__)), ccg), aggregation), f"{training_window}_month_tw")
 
-
-# Create the LSTM model
 
 batch_size = 14
 num_epochs = 1000
