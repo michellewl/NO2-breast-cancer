@@ -40,9 +40,9 @@ epochs_per_print = 50
 torch.manual_seed(1)
 
 train_seq_path = join(load_folder, "training_sequences.npy")
-train_target_path = join(load_folder, "training_targets.npy")
+train_target_path = join(load_folder, f"training_targets_{age_category}.npy")
 val_seq_path = join(load_folder, "validation_sequences.npy")
-val_target_path = join(load_folder, "validation_targets.npy")
+val_target_path = join(load_folder, f"validation_targets_{age_category}.npy")
 
 training_dataset = NO2Dataset(train_seq_path, train_target_path)
 validation_dataset = NO2Dataset(val_seq_path, val_target_path)
