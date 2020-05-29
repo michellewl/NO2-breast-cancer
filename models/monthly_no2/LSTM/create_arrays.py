@@ -4,6 +4,7 @@ from os import listdir, makedirs
 from os.path import join, dirname, realpath, exists
 import re
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 import joblib
 from dateutil.relativedelta import relativedelta
 
@@ -102,10 +103,10 @@ y_train = ncras_df.loc[(ncras_df.index.year != test_year) & (ncras_df.ccg_name =
 y_test = ncras_df.loc[(ncras_df.index.year == test_year) & (ncras_df.ccg_name == ccg), age_category] \
     .values.reshape(-1, 1)
 
-print(f"x train: {x_train.shape}"
-      f"\ny train: {y_train.shape}"
-      f"\nx test: {x_test.shape}"
-      f"\ny test: {y_test.shape}")
+# print(f"x train: {x_train.shape}"
+#       f"\ny train: {y_train.shape}"
+#       f"\nx test: {x_test.shape}"
+#       f"\ny test: {y_test.shape}")
 
 # Save the arrays
 # if not exists(ccg):
@@ -123,19 +124,73 @@ save_folder = join(join(join(dirname(realpath(__file__)), ccg), "_".join(aggrega
 if not exists(save_folder):
     makedirs(save_folder)
 
-np.save(join(save_folder, "x_train"), x_train)
-np.save(join(save_folder, "x_test"), x_test)
-np.save(join(save_folder, f"y_{age_category}_train"), y_train)
-np.save(join(save_folder, f"y_{age_category}_test"), y_test)
+# np.save(join(save_folder, "x_train"), x_train)
+# np.save(join(save_folder, "x_test"), x_test)
+# np.save(join(save_folder, f"y_{age_category}_train"), y_train)
+# np.save(join(save_folder, f"y_{age_category}_test"), y_test)
 
 # Normalise input and output training data
 x_normaliser = StandardScaler().fit(x_train)
-x_train = x_normaliser.transform(x_train)
+# x_train = x_normaliser.transform(x_train)
 y_normaliser = StandardScaler().fit(y_train)
-y_train = y_normaliser.transform(y_train)
+# y_train = y_normaliser.transform(y_train)
 
 # Save normalisation to later apply to test sets
 joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
 joblib.dump(y_normaliser, join(save_folder, f"y_{age_category}_normaliser.sav"))
 
-print(f"Saved arrays to {save_folder}")
+# print(f"Saved normaliser to {save_folder}")
+
+##############################################################################################################
+# From fit.py
+# quantile_step = 0.1  # Make this False if not using.
+# test_year = 2017
+
+# if quantile_step:
+#     aggregation = [str(len(aggregation)-1), "quantiles"]
+# load_folder = join(join(join(dirname(realpath(__file__)), ccg), "_".join(aggregation)), f"{training_window}_month_tw")
+
+# Load the arrays
+# x_train, x_test = np.load(join(save_folder, "x_train.npy")), np.load(join(save_folder, "x_test.npy"))
+# y_train, y_test = np.load(join(load_folder, f"y_{age_category}_train.npy")), np.load(join(load_folder, f"y_{age_category}_test.npy"))
+
+# Load normalisation
+# x_normaliser, y_normaliser = joblib.load(join(load_folder, "x_normaliser.sav")), \
+#                              joblib.load(join(load_folder, f"y_{age_category}_normaliser.sav"))
+
+
+# Normalise input and output training data
+x_train_norm = x_normaliser.transform(x_train)
+y_train_norm = y_normaliser.transform(y_train).squeeze()
+x_test_norm = x_normaliser.transform(x_test)
+y_test_norm = y_normaliser.transform(y_test).squeeze()
+
+
+# Define function to produce the x sequences.
+
+def create_x_sequences(x_array, num_sequences, tw):
+    input_sequences = []
+    for i in range(num_sequences):
+        train_sequence = x_array[i:i+tw]
+        input_sequences.append(train_sequence)
+    input_sequences = np.stack(input_sequences, axis=0)
+    return input_sequences
+
+train_val_inputs = create_x_sequences(x_train_norm, len(y_train_norm), training_window)
+test_inputs = create_x_sequences(x_test_norm, len(y_test_norm), training_window)
+# print(train_val_inputs.shape, y_train_norm.shape)
+validation_size = 0.2
+training_sequences, validation_sequences, training_targets, validation_targets = train_test_split(train_val_inputs, y_train_norm, test_size=validation_size, random_state=1)
+print(f"\nTraining sequences {training_sequences.shape}\nValidation sequences {validation_sequences.shape}")
+print(f"Training targets {training_targets.shape}\nValidation targets {validation_targets.shape}")
+print(f"\nTest sequences {test_inputs.shape}\nTest targets {y_test_norm.shape}")
+
+np.save(join(save_folder, "training_sequences.npy"), training_sequences)
+np.save(join(save_folder, "validation_sequences.npy"), validation_sequences)
+np.save(join(save_folder, f"training_targets_{age_category}.npy"), training_targets)
+np.save(join(save_folder, f"validation_targets_{age_category}.npy"), validation_targets)
+
+np.save(join(save_folder, "test_sequences.npy"), test_inputs)
+np.save(join(save_folder, f"test_targets_{age_category}.npy"), y_test_norm)
+
+print("\nSaved npy arrays.")
