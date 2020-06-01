@@ -10,27 +10,27 @@ from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="darkgrid")
+import config
 
-training_window = 3  # consider the last X months of NO2 for each breast cancer diagnosis month
+training_window = config.training_window  # consider the last X months of NO2 for each breast cancer diagnosis month
+quantile_step = config.quantile_step  # Make this False if not using.
 
-# aggregation = ["min", "max"]
-# aggregation = ["mean"]
-quantile_step = 0.1  # Make this False if not using.
-
-ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[0]
-test_year = 2017
+ccgs = config.ccgs
+ccg = config.ccg
+test_year = config.test_year
 
 # One age category
-age_category = "all_ages"
+age_category = config.age_category
 print(f"{ccg}\n{age_category}")
 
-hidden_layer_size = 100
-batch_size = 14
-torch.manual_seed(1)
+hidden_layer_size = config.hidden_layer_size
+batch_size = config.batch_size
+torch.manual_seed(config.random_seed)
 
 if quantile_step:
     aggregation = f"{int(1/quantile_step)}_quantiles"
+else:
+    aggregation = config.aggregation
 load_folder = join(join(join(dirname(realpath(__file__)), ccg), aggregation), f"{training_window}_month_tw")
 
 # Load train & test data

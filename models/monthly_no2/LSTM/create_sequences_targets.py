@@ -7,21 +7,21 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import joblib
 from dateutil.relativedelta import relativedelta
+import config
 
-training_window = 3  # consider the last X months of NO2 for each breast cancer diagnosis month
+training_window = config.training_window  # consider the last X months of NO2 for each breast cancer diagnosis month
+quantile_step = config.quantile_step  # Make this False if not using.
 
-# aggregation = ["min", "max"]
-# aggregation = ["mean"]
-quantile_step = 0.1  # Make this False if not using.
+ccgs = config.ccgs
+ccg = config.ccg
+test_year = config.test_year
 
-ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[0]
-test_year = 2017
-
-dates_as_inputs = False
+dates_as_inputs = config.dates_as_inputs
 
 if quantile_step:
     aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
+else:
+    aggregation = config.aggregation
 print(aggregation)
 
 no2_folder = join(join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN"), "monthly")
@@ -89,7 +89,7 @@ for no2_df in no2_df_list:
 age_categories = [col for col in ncras_df.columns if "age" in col]
 
 # One CCG, one age category
-age_category = age_categories[-1]
+age_category = config.age_category
 print(f"{ccg}\n{age_category}")
 
 # Get data arrays and split x and y into train and test (prediction) sets.

@@ -5,29 +5,29 @@ from copy import deepcopy
 from dataset import NO2Dataset
 from torch.utils.data import DataLoader
 from lstm_model_class import LSTM
+import config
 
-training_window = 3  # consider the last X months of NO2 for each breast cancer diagnosis month
+training_window = config.training_window  # consider the last X months of NO2 for each breast cancer diagnosis month
+quantile_step = config.quantil_step  # Make this False if not using.
 
-# aggregation = ["min", "max"]
-# aggregation = ["mean"]
-quantile_step = 0.1  # Make this False if not using.
-
-ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[0]
+ccgs = config.ccgs
+ccg = config.ccg
 
 # One age category
-age_category = "all_ages"
+age_category = config.age_category
 print(f"{ccg}\n{age_category}")
 
-hidden_layer_size = 100
-batch_size = 14
-num_epochs = 1000
-batches_per_print = False
-epochs_per_print = 50
-torch.manual_seed(1)
+hidden_layer_size = config.hidden_layer_size
+batch_size = config.batch_size
+num_epochs = config.num_epochs
+batches_per_print = config.batches_per_print
+epochs_per_print = config.epochs_per_print
+torch.manual_seed(config.random_seed)
 
 if quantile_step:
     aggregation = f"{int(1/quantile_step)}_quantiles"
+else:
+    aggregation = config.aggregation
 load_folder = join(join(join(dirname(realpath(__file__)), ccg), aggregation), f"{training_window}_month_tw")
 
 train_seq_path = join(load_folder, "training_sequences.npy")
@@ -45,7 +45,7 @@ validation_dataloader = DataLoader(validation_dataset, batch_size=batch_size, sh
 # Create model object of the LSTM class, define a loss function, define the optimiser.
 model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=hidden_layer_size)
 criterion = nn.MSELoss()
-optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
+optimiser = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
 print(f"Model:\n{model}")
 
 # Train the LSTM model

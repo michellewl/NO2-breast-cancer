@@ -18,4 +18,6 @@ batches_per_print = False
 epochs_per_print = 50
 random_seed = 1
 
+learning_rate = 0.001
+
 model_epoch = "best"  # Choose "final" or "best" model.
