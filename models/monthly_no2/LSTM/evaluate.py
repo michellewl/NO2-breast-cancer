@@ -26,12 +26,15 @@ model_epoch = "best"  # Choose "final" or "best" model.
 age_category = "all_ages"
 print(f"{ccg}\n{age_category}")
 
+hidden_layer_size = 100
+batch_size = 14
+torch.manual_seed(1)
+
 if quantile_step:
     aggregation = f"{int(1/quantile_step)}_quantiles"
 load_folder = join(join(join(dirname(realpath(__file__)), ccg), aggregation), f"{training_window}_month_tw")
 
-batch_size = 14
-torch.manual_seed(1)
+
 
 # Load train & test data
 training_dataset = NO2Dataset(join(load_folder, "train_val_sequences.npy"), join(load_folder, f"train_val_targets_{age_category}.npy"))
@@ -42,7 +45,7 @@ test_dataloader = DataLoader(test_dataset, batch_size=batch_size)
 
 # Load the model
 checkpoint = torch.load(join(load_folder,  f"lstm_model_{age_category}.tar"))
-model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=100)
+model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=hidden_layer_size)
 print(model)
 
 if model_epoch == "best":
@@ -127,9 +130,9 @@ fig.subplots_adjust(top=0.5)
 fig.tight_layout(pad=2)
 
 if model_epoch == "best":
-    plot_filename = f"time_series_{age_category}.png"
+    plot_filename = f"time_series_{age_category}_hl{hidden_layer_size}.png"
 elif model_epoch == "final":
-    plot_filename = f"time_series_{age_category}_overfit.png"
+    plot_filename = f"time_series_{age_category}_overfit_hl{hidden_layer_size}.png"
 fig.savefig(join(load_folder, plot_filename), dpi=fig.dpi)
 # plt.show()
 

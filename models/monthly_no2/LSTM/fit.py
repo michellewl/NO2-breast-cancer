@@ -19,17 +19,16 @@ ccg = ccgs[0]
 age_category = "all_ages"
 print(f"{ccg}\n{age_category}")
 
-
-if quantile_step:
-    aggregation = f"{int(1/quantile_step)}_quantiles"
-load_folder = join(join(join(dirname(realpath(__file__)), ccg), aggregation), f"{training_window}_month_tw")
-
-
+hidden_layer_size = 100
 batch_size = 14
 num_epochs = 1000
 batches_per_print = False
 epochs_per_print = 50
 torch.manual_seed(1)
+
+if quantile_step:
+    aggregation = f"{int(1/quantile_step)}_quantiles"
+load_folder = join(join(join(dirname(realpath(__file__)), ccg), aggregation), f"{training_window}_month_tw")
 
 train_seq_path = join(load_folder, "training_sequences.npy")
 train_target_path = join(load_folder, f"training_targets_{age_category}.npy")
@@ -44,13 +43,13 @@ validation_dataloader = DataLoader(validation_dataset, batch_size=batch_size, sh
 
 
 # Create model object of the LSTM class, define a loss function, define the optimiser.
-model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=100)
+model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=hidden_layer_size)
 criterion = nn.MSELoss()
 optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 print(f"Model:\n{model}")
 
 # Train the LSTM model
-filename = f"lstm_model_{age_category}.tar"
+filename = f"lstm_model_{age_category}_hl{hidden_layer_size}.tar"
 save_path = join(load_folder, filename)
 
 training_loss_history = []

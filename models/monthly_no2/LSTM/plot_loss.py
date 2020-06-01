@@ -25,12 +25,13 @@ test_year = 2017
 age_category = "all_ages"
 print(f"{ccg}\n{age_category}")
 
+hidden_layer_size = 100
+batch_size = 14
+torch.manual_seed(1)
+
 if quantile_step:
     aggregation = f"{int(1/quantile_step)}_quantiles"
 load_folder = join(join(join(dirname(realpath(__file__)), ccg), aggregation), f"{training_window}_month_tw")
-
-batch_size = 14
-torch.manual_seed(1)
 
 # Load train & test data
 training_dataset = NO2Dataset(join(load_folder, "train_val_sequences.npy"), join(load_folder, f"train_val_targets_{age_category}.npy"))
@@ -40,8 +41,8 @@ training_dataloader = DataLoader(training_dataset, batch_size=batch_size)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size)
 
 # Load the model
-checkpoint = torch.load(join(load_folder,  f"lstm_model_{age_category}.tar"))
-model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=100)
+checkpoint = torch.load(join(load_folder,  f"lstm_model_{age_category}_hl{hidden_layer_size}.tar"))
+model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=hidden_layer_size)
 
 training_losses = checkpoint["training_loss_history"]
 val_losses = checkpoint["validation_loss_history"]
@@ -61,4 +62,4 @@ plt.ylabel("MSE loss")
 plt.title(f"Training loss")
 # plt.show()
 fig.tight_layout()
-fig.savefig(join(load_folder, f"loss_history_{age_category}.png"), dpi=fig.dpi)
+fig.savefig(join(load_folder, f"loss_history_{age_category}_hl{hidden_layer_size}.png"), dpi=fig.dpi)
