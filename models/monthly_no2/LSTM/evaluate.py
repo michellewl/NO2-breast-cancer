@@ -20,7 +20,7 @@ quantile_step = 0.1  # Make this False if not using.
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
 ccg = ccgs[0]
 test_year = 2017
-model_epoch = "final"  # Choose "final" or "best" model.
+model_epoch = "best"  # Choose "final" or "best" model.
 
 # One age category
 age_category = "all_ages"

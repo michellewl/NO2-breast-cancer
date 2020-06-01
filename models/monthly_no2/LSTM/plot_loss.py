@@ -18,7 +18,7 @@ training_window = 3  # consider the last X months of NO2 for each breast cancer 
 quantile_step = 0.1  # Make this False if not using.
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[1]
+ccg = ccgs[0]
 test_year = 2017
 
 # One age category
@@ -50,14 +50,15 @@ epochs = checkpoint["total_epochs"]
 
 # Plot training and validation loss history and annotate the epoch with best validation loss
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(12, 8))
 ax.plot(range(epochs+1), training_losses, label="training loss")
 ax.plot(range(epochs+1), val_losses, label="validation loss")
 ax.scatter(best_epoch, min(val_losses))
 plt.annotate(f"epoch {best_epoch}", (best_epoch*1.05, min(val_losses)))
-#plt.ylim(0, 1e-8)
 plt.legend()
 plt.xlabel("epoch")
 plt.ylabel("MSE loss")
 plt.title(f"Training loss")
-plt.show()
+# plt.show()
+fig.tight_layout()
+fig.savefig(join(load_folder, f"loss_history_{age_category}.png"), dpi=fig.dpi)
