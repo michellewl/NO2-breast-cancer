@@ -8,7 +8,7 @@ from lstm_model_class import LSTM
 import config
 
 training_window = config.training_window  # consider the last X months of NO2 for each breast cancer diagnosis month
-quantile_step = config.quantil_step  # Make this False if not using.
+quantile_step = config.quantile_step  # Make this False if not using.
 
 ccgs = config.ccgs
 ccg = config.ccg

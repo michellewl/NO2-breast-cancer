@@ -1,10 +1,10 @@
 training_window = 3  # consider the last X months of NO2 for each breast cancer diagnosis month
 
 aggregation = False  # Choose from ["mean"], or ["min", "max"]. Make this False if not using.
-quantile_step = 0.1  # Make this False if not using.
+quantile_step = 0.25  # Make this False if not using.
 
 ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[0]
+ccg = ccgs[1]
 test_year = 2017
 
 dates_as_inputs = False
@@ -20,4 +20,4 @@ random_seed = 1
 
 learning_rate = 0.001
 
-model_epoch = "best"  # Choose "final" or "best" model.
+model_epoch = "final"  # Choose "final" or "best" model.

@@ -44,7 +44,7 @@ training_dataloader = DataLoader(training_dataset, batch_size=batch_size)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size)
 
 # Load the model
-checkpoint = torch.load(join(load_folder,  f"lstm_model_{age_category}.tar"))
+checkpoint = torch.load(join(load_folder,  f"lstm_model_{age_category}_hl{hidden_layer_size}.tar"))
 model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=hidden_layer_size)
 print(model)
 
