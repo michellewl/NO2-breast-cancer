@@ -160,4 +160,7 @@ np.save(join(save_folder, f"validation_targets_{age_category}.npy"), validation_
 np.save(join(save_folder, "test_sequences.npy"), test_inputs)
 np.save(join(save_folder, f"test_targets_{age_category}.npy"), y_test_norm)
 
+np.save(join(save_folder, "train_val_sequences.npy"), train_val_inputs)
+np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), y_train_norm)
+
 print("\nSaved npy arrays.")
