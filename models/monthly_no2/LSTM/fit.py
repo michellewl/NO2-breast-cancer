@@ -1,9 +1,6 @@
 import torch
 import torch.nn as nn
-import numpy as np
 from os.path import join, dirname, realpath
-from sklearn.model_selection import train_test_split
-import joblib
 from copy import deepcopy
 from dataset import NO2Dataset
 from torch.utils.data import DataLoader
