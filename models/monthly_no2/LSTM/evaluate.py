@@ -31,7 +31,7 @@ torch.manual_seed(config.random_seed)
 if quantile_step:
     aggregation = f"{int(1/quantile_step)}_quantiles"
 else:
-    aggregation = config.aggregation
+    aggregation = "_".join(config.aggregation)
 load_folder = join(join(join(dirname(realpath(__file__)), ccg), aggregation), f"{training_window}_month_tw")
 
 
