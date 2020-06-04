@@ -6,7 +6,7 @@ from dataset import NO2Dataset
 from torch.utils.data import DataLoader
 from lstm_model_class import LSTM
 import joblib
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score, mean_squared_error
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="darkgrid")
@@ -76,7 +76,8 @@ training_targets = y_normaliser.inverse_transform(np.concatenate(training_target
 training_prediction = y_normaliser.inverse_transform(np.concatenate(training_prediction, axis=None))
 print(f"Train targets {training_targets.shape}, Train predict {training_prediction.shape}")
 train_rsq = r2_score(training_targets, training_prediction)
-print(f"Train R sq {train_rsq}")
+train_mse = mean_squared_error(training_targets, training_prediction)
+print(f"Train R sq {train_rsq}\nTrain MSE {train_mse}")
 
 # Make predictions on test set
 test_targets = []
@@ -95,7 +96,8 @@ test_targets = y_normaliser.inverse_transform(np.concatenate(test_targets, axis=
 test_prediction = y_normaliser.inverse_transform(np.concatenate(test_prediction, axis=None))
 print(f"\nTest targets {test_targets.shape}, Test predict {test_prediction.shape}")
 test_rsq = r2_score(test_targets, test_prediction)
-print(f"Test R sq {test_rsq}")
+test_mse = mean_squared_error(test_targets,test_prediction)
+print(f"Test R sq {test_rsq}\nTest MSE {test_mse}")
 
 # Make plots
 ## Prediction plots
@@ -108,11 +110,11 @@ fig, axs = plt.subplots(2, 1, figsize=(15, 10))
 axs[0].plot(train_dates, training_targets, label="observed")
 axs[0].plot(train_dates, training_prediction, label="predicted")
 axs[0].set_title(f"Training set (2002-06 to {test_year-1}-12)")
-axs[0].annotate(f"R$^2$ = {train_rsq}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
+axs[0].annotate(f"R$^2$ = {train_rsq}  MSE = {train_mse}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
 axs[1].plot(test_dates, test_targets, label="observed")
 axs[1].plot(test_dates, test_prediction, label="prediction")
 axs[1].set_title(f"Test set ({test_year})")
-axs[1].annotate(f"R$^2$ = {test_rsq}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
+axs[1].annotate(f"R$^2$ = {test_rsq}  MSE = {test_mse}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
 
 for ax in axs.flatten():
     ax.set_xlabel("Date")
