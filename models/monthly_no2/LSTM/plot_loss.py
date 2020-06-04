@@ -1,12 +1,8 @@
 import torch
-import numpy as np
-import pandas as pd
 from os.path import join, dirname, realpath
 from dataset import NO2Dataset
 from torch.utils.data import DataLoader
 from lstm_model_class import LSTM
-import joblib
-from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="darkgrid")
