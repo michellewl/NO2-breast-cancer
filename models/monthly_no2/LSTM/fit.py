@@ -28,6 +28,7 @@ if quantile_step:
     aggregation = f"{int(1/quantile_step)}_quantiles"
 else:
     aggregation = "_".join(config.aggregation)
+print(aggregation)
 load_folder = join(join(join(dirname(realpath(__file__)), ccg), aggregation), f"{training_window}_month_tw")
 
 train_seq_path = join(load_folder, "training_sequences.npy")
