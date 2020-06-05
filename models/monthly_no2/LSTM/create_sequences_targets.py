@@ -9,6 +9,9 @@ import joblib
 from dateutil.relativedelta import relativedelta
 import config
 
+laqn_start_date = config.laqn_start_date
+laqn_end_date = config.laqn_end_date
+
 training_window = config.training_window  # consider the last X months of NO2 for each breast cancer diagnosis month
 quantile_step = config.quantile_step  # Make this False if not using.
 
@@ -24,7 +27,7 @@ else:
     aggregation = config.aggregation
 print(aggregation)
 
-no2_folder = join(join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN"), "monthly")
+no2_folder = join(join(join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN"), f"{laqn_start_date}_{laqn_end_date}"), "monthly")
 no2_filenames = [file for method in aggregation for file in listdir(no2_folder) if re.findall(f"ccgs_monthly_{method}.csv", file)]
 print(no2_filenames)
 

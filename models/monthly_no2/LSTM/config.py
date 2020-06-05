@@ -1,3 +1,7 @@
+SpeciesCode = "NO2"
+laqn_start_date = "1997-01-01"
+laqn_end_date = "2018-01-01"
+
 training_window = 3  # consider the last X months of NO2 for each breast cancer diagnosis month
 
 aggregation = ["min", "max"]  # Choose from ["mean"], or ["min", "max"]. Make this False if not using.
