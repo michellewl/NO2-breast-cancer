@@ -15,7 +15,7 @@ ccg = config.ccg
 
 # One age category
 age_category = config.age_category
-print(f"{ccg}\n{age_category}")
+print(f"{ccg}\n{age_category}\n{training_window}-month training window")
 
 hidden_layer_size = config.hidden_layer_size
 batch_size = config.batch_size
