@@ -1,15 +1,19 @@
 import numpy as np
 import pandas as pd
-import os
+from os.path import join, dirname, realpath, exists
+from os import listdir, makedirs
 import re
 import requests
-import matplotlib.pyplot as plt
-import seaborn as sns
-sns.set(style="darkgrid")
+import config
 
-folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) # folder where data is saved
-filename = [file for file in os.listdir(folder) if "all_sites.csv" in file][0]
-no2_df = pd.read_csv(os.path.join(folder, filename))
+StartDate = config.StartDate
+EndDate = config.EndDate
+SpeciesCode = config.SpeciesCode
+
+
+folder = join(dirname(dirname(realpath(__file__))), f"{StartDate}_{EndDate}") # folder where data is saved
+filename = [file for file in listdir(folder) if "all_sites.csv" in file][0]
+no2_df = pd.read_csv(join(folder, filename))
 no2_df.MeasurementDateGMT = pd.to_datetime(no2_df.MeasurementDateGMT)
 no2_df.set_index("MeasurementDateGMT", inplace=True)
 # print(f"{no2_df.shape[0]} time points.\n{no2_df.shape[1]} sites.")
@@ -23,9 +27,9 @@ local_auths = list(set(meta_data_df["local_authority"].tolist()))
 local_auths.sort()
 print(f"{len(local_auths)} local authorities.")
 
-ccg_folder = os.path.join(os.path.dirname(folder), "CCG_populations")
-ccg_filename = [file for file in os.listdir(ccg_folder) if "london_females_2002-18.csv" in file][0]
-ccg_df = pd.read_csv(os.path.join(ccg_folder, ccg_filename))
+ccg_folder = join(dirname(folder), "CCG_populations")
+ccg_filename = [file for file in listdir(ccg_folder) if "london_females_2002-18.csv" in file][0]
+ccg_df = pd.read_csv(join(ccg_folder, ccg_filename))
 ccgs = list(set(ccg_df["ccg"].tolist()))
 ccgs.sort()
 # ccgs = [ccg.replace("NHS ", "") for ccg in list(set(ccg_df["ccg"].tolist()))]
@@ -119,6 +123,6 @@ print(averaged_ccg_df)
 print(averaged_ccg_df.columns)
 
 print("Saving full dataframe...")
-save_filepath = os.path.join(folder, f"NO2_2002-18_averaged_ccgs.csv")
+save_filepath = join(folder, f"{SpeciesCode}_averaged_ccgs.csv")
 averaged_ccg_df.to_csv(save_filepath)
 print("Completed save.")
