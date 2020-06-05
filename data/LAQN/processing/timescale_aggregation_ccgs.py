@@ -16,8 +16,8 @@ no2_df.MeasurementDateGMT = pd.to_datetime(no2_df.MeasurementDateGMT)
 no2_df.set_index("MeasurementDateGMT", inplace=True)
 print(f"{SpeciesCode} dataframe {no2_df.shape}")
 
-# aggregation = ["mean", "min", "max"]
-quantile_step = 0.25  # "False" if not in use.
+aggregation = ["mean", "min", "max"]
+quantile_step = False  # "False" if not in use.
 if quantile_step:
     aggregation = np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()
 print(aggregation)
@@ -39,15 +39,4 @@ for method in aggregation:
     elif isinstance(method, float):
         aggregated_df = no2_df.copy().resample(timescale_code).quantile(method)
         method = f"{int(method*100)}_quantile"
-    aggregated_df.to_csv(join(save_folder, f"NO2_2002-18_ccgs_{timescale}_{method}.csv"), index=True)
-
-# monthly_mean_df = no2_df.copy().resample("M").mean()
-# print(monthly_mean_df)
-#
-# monthly_min_df = no2_df.copy().resample("M").min()
-# monthly_max_df = no2_df.copy().resample("M").max()
-# print(monthly_min_df, monthly_max_df)
-#
-# monthly_mean_df.to_csv(os.path.join(folder, "NO2_2002-18_ccgs_monthly_mean.csv"), index=True)
-# monthly_min_df.to_csv(os.path.join(folder, "NO2_2002-18_ccgs_monthly_min.csv"), index=True)
-# monthly_max_df.to_csv(os.path.join(folder, "NO2_2002-18_ccgs_monthly_max.csv"), index=True)
+    aggregated_df.to_csv(join(save_folder, f"{SpeciesCode}_ccgs_{timescale}_{method}.csv"), index=True)
