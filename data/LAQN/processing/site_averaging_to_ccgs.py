@@ -27,7 +27,7 @@ local_auths = list(set(meta_data_df["local_authority"].tolist()))
 local_auths.sort()
 print(f"{len(local_auths)} local authorities.")
 
-ccg_folder = join(dirname(folder), "CCG_populations")
+ccg_folder = join(dirname(dirname(folder)), "CCG_populations")
 ccg_filename = [file for file in listdir(ccg_folder) if "london_females_2002-18.csv" in file][0]
 ccg_df = pd.read_csv(join(ccg_folder, ccg_filename))
 ccgs = list(set(ccg_df["ccg"].tolist()))
