@@ -2,13 +2,14 @@ import requests
 import pandas as pd
 from os.path import join, dirname, realpath, exists
 from os import makedirs
+import config
 
-batch = 9
-num_batches = 10
+batch = config.batch
+num_batches = config.num_batches
 
-SpeciesCode = "NO2"
-StartDate = "1997-01-01"
-EndDate = "2018-01-01"
+SpeciesCode = config.SpeciesCode
+StartDate = config.StartDate
+EndDate = config.EndDate
 
 # Default time period is 'hourly'.
 # Data returned in CSV format
@@ -51,6 +52,6 @@ dates_folder = join(dirname(dirname(realpath(__file__))), f"{StartDate}_{EndDate
 if not exists(dates_folder):
     makedirs(dates_folder)
 
-save_filepath = join(dates_folder, f"NO2_batch{batch}.csv")
+save_filepath = join(dates_folder, f"{SpeciesCode}_batch{batch}.csv")
 no2_df.to_csv(save_filepath)
 print(f"\nSaved batch {batch} to csv.")

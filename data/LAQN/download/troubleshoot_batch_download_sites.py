@@ -1,13 +1,15 @@
 import requests
 import json
 import pandas as pd
-import os
+from os.path import join, dirname, realpath, exists
+from os import listdir, makedirs
+import config
 
-problem_sites = ["HS5", "ME6"]
+problem_sites = config.problem_sites
 
-SpeciesCode = "NO2"
-StartDate = "2002-01-01"
-EndDate = "2018-01-01"
+SpeciesCode = config.SpeciesCode
+StartDate = config.StartDate
+EndDate = config.EndDate
 
 no2_df = pd.DataFrame()
 
@@ -26,7 +28,7 @@ for SiteCode in problem_sites:
     else:
         no2_df = no2_df.join(cur_df.copy(), how="left")
 
-folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-save_filepath = os.path.join(folder, f"NO2_2002-18_batch_troubleshooted.csv")
+folder = join(dirname(dirname(realpath(__file__))), f"{StartDate}_{EndDate}")
+save_filepath = join(folder, f"{SpeciesCode}_batch_troubleshooted.csv")
 no2_df.to_csv(save_filepath)
 print("Saved troubleshooted batch.")

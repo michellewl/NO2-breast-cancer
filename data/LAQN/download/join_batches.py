@@ -1,18 +1,24 @@
 import pandas as pd
-import os
+from os.path import join, dirname, realpath, exists
+from os import listdir, makedirs
 import re
+import config
+
+StartDate = config.StartDate
+EndDate = config.EndDate
+SpeciesCode = config.SpeciesCode
 
 
-folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-batch_files = [re.compile(r"NO2_2002-18_batch\w+.csv").findall(file)[0] for file in os.listdir(folder)
-               if re.compile(r"NO2_2002-18_batch\w+.csv").findall(file)]
+folder = join(dirname(dirname(realpath(__file__))), f"{StartDate}_{EndDate}")
+batch_files = [file for file in listdir(folder)
+               if re.compile(rf"{SpeciesCode}_batch\w+.csv").findall(file)]
 
 no2_df = pd.DataFrame()
 
 for batch_file in batch_files:
     batch = re.compile(r"batch\w+").findall(batch_file)[0]
     print(f"{batch}")
-    filepath = os.path.join(folder, batch_file)
+    filepath = join(folder, batch_file)
     batch_df = pd.read_csv(filepath, index_col="MeasurementDateGMT")
     batch_df.dropna(axis="columns", how="all", inplace=True)
     batch_df.columns = [column.replace(": Nitrogen Dioxide (ug/m3)", "") for column in batch_df.columns]
@@ -32,6 +38,6 @@ for batch_file in batch_files:
 # print(no2_df.columns)
 # print(no2_df)
 print("Saving full dataframe.")
-save_filepath = os.path.join(folder, f"NO2_2002-18_all_sites.csv")
+save_filepath = join(folder, f"NO2_all_sites.csv")
 no2_df.to_csv(save_filepath)
 print("Completed save.")
