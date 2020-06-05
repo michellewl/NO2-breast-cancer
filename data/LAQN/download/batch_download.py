@@ -3,7 +3,7 @@ import pandas as pd
 from os.path import join, dirname, realpath, exists
 from os import makedirs
 
-batch = 6
+batch = 9
 num_batches = 10
 
 SpeciesCode = "NO2"
@@ -46,12 +46,11 @@ for SiteCode in all_site_codes[start_batch:end_batch]:
 if problem_sites:
     print(f"Unable to join sites: {problem_sites}")
 
-folder = dirname(dirname(realpath(__file__)))
-new_dates_folder = join(folder, f"{StartDate}_{EndDate}")
+dates_folder = join(dirname(dirname(realpath(__file__))), f"{StartDate}_{EndDate}")
 
-if not exists(new_dates_folder):
-    makedirs(new_dates_folder)
+if not exists(dates_folder):
+    makedirs(dates_folder)
 
-save_filepath = join(new_dates_folder, f"NO2_2002-18_batch{batch}.csv")
+save_filepath = join(dates_folder, f"NO2_batch{batch}.csv")
 no2_df.to_csv(save_filepath)
 print(f"\nSaved batch {batch} to csv.")
