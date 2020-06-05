@@ -10,8 +10,7 @@ StartDate = config.StartDate
 EndDate = config.EndDate
 SpeciesCode = config.SpeciesCode
 
-
-folder = join(dirname(dirname(realpath(__file__))), f"{StartDate}_{EndDate}") # folder where data is saved
+folder = join(dirname(dirname(realpath(__file__))), f"{StartDate}_{EndDate}")  # folder where data is saved
 filename = [file for file in listdir(folder) if "all_sites.csv" in file][0]
 no2_df = pd.read_csv(join(folder, filename))
 no2_df.MeasurementDateGMT = pd.to_datetime(no2_df.MeasurementDateGMT)
