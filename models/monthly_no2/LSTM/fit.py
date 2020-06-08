@@ -45,7 +45,6 @@ validation_dataloader = DataLoader(validation_dataset, batch_size=batch_size, sh
 if config.compute_test_loss:
     test_dataset = NO2Dataset(join(load_folder, "test_sequences.npy"), join(load_folder, f"test_targets_{age_category}.npy"))
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
-    test_loss_sum = 0
 test_loss_history = []
 
 
@@ -106,12 +105,14 @@ for epoch in range(num_epochs):
             validation_loss_sum += single_loss.item()*data["targets"].shape[0]
             #print(f"Validation batch {batch_num} shape {targets_val.shape[0]}")
         if config.compute_test_loss:
+            test_loss_sum = 0
             for batch_num, data in enumerate(test_dataloader):
                 sequences_test = data["sequences"]
                 targets_test = data["targets"]
                 y_predict_test = model(sequences_test)
                 single_loss = criterion(y_predict_test, targets_test)
                 test_loss_sum += single_loss.item()*data["targets"].shape[0]
+                #print(f"loss sum {test_loss_sum} targets {targets_test} predictions {y_predict_test}")
             test_loss_history.append(test_loss_sum / len(test_dataset))
     # Store the model with smallest validation loss. Check if the validation loss is the lowest BEFORE
     # saving it to loss history (otherwise it will not be lower than itself)
