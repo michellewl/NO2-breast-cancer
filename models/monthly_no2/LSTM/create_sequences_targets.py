@@ -69,9 +69,8 @@ val_seq_list =[]
 val_targ_list = []
 test_seq_list = []
 test_targ_list = []
-
+print("Processing CCGs...")
 for ccg in ccgs:
-    print("Processing CCGs...")
     no2_df_list = []
 
     for no2_file in no2_filenames:
@@ -183,18 +182,34 @@ validation_sequences = np.concatenate(val_seq_list, axis=0)
 validation_targets = np.concatenate(val_targ_list, axis=0)
 test_sequences = np.concatenate(test_seq_list, axis=0)
 test_targets = np.concatenate(test_targ_list, axis=0)
+# print(np.isnan(training_sequences).shape)
+# print(np.isnan(training_sequences).any(axis=(1)).shape)
+# print(np.logical_not(np.isnan(training_sequences).any(axis=(1, 2))).shape)
+#
+# indices_of_sequences_to_keep = np.logical_not(np.isnan(training_sequences).any(axis=(1, 2)))
+# sequences_without_nans = training_sequences[indices_of_sequences_to_keep]
+print(f"\nDropping NaNs\nTraining {np.isnan(training_sequences).any(axis=(1, 2)).sum()}\n"
+      f"Validation {np.isnan(validation_sequences).any(axis=(1, 2)).sum()}\n"
+      f"Test {np.isnan(test_sequences).any(axis=(1, 2)).sum()}")
+# Look along dimensions 1 & 2 for NaNs
+training_sequences_dropna = training_sequences[np.logical_not(np.isnan(training_sequences).any(axis=(1, 2)))]
+training_targets_dropna = training_targets[np.logical_not(np.isnan(training_sequences).any(axis=(1, 2)))]
+validation_sequences_dropna = validation_sequences[np.logical_not(np.isnan(validation_sequences).any(axis=(1, 2)))]
+validation_targets_dropna = validation_targets[np.logical_not(np.isnan(validation_sequences).any(axis=(1, 2)))]
+test_sequences_dropna = test_sequences[np.logical_not(np.isnan(test_sequences).any(axis=(1, 2)))]
+test_targets_dropna = test_targets[np.logical_not(np.isnan(test_sequences).any(axis=(1, 2)))]
 
-print(f"\nTraining sequences {training_sequences.shape}\nValidation sequences {validation_sequences.shape}")
-print(f"Training targets {training_targets.shape}\nValidation targets {validation_targets.shape}")
-print(f"\nTest sequences {test_sequences.shape}\nTest targets {test_targets.shape}")
+print(f"\nTraining sequences {training_sequences_dropna.shape}\nTraining targets {training_targets_dropna.shape}")
+print(f"Validation sequences {validation_sequences_dropna.shape}\nValidation targets {validation_targets_dropna.shape}")
+print(f"Test sequences {test_sequences_dropna.shape}\nTest targets {test_targets_dropna.shape}")
 
-np.save(join(save_folder, "training_sequences.npy"), training_sequences)
-np.save(join(save_folder, "validation_sequences.npy"), validation_sequences)
-np.save(join(save_folder, f"training_targets_{age_category}.npy"), training_targets)
-np.save(join(save_folder, f"validation_targets_{age_category}.npy"), validation_targets)
+np.save(join(save_folder, "training_sequences.npy"), training_sequences_dropna)
+np.save(join(save_folder, "validation_sequences.npy"), validation_sequences_dropna)
+np.save(join(save_folder, f"training_targets_{age_category}.npy"), training_targets_dropna)
+np.save(join(save_folder, f"validation_targets_{age_category}.npy"), validation_targets_dropna)
 
-np.save(join(save_folder, "test_sequences.npy"), test_inputs)
-np.save(join(save_folder, f"test_targets_{age_category}.npy"), y_test_norm)
+np.save(join(save_folder, "test_sequences.npy"), test_sequences_dropna)
+np.save(join(save_folder, f"test_targets_{age_category}.npy"), test_targets_dropna)
 
 # np.save(join(save_folder, "train_val_sequences.npy"), train_val_inputs)
 # np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), y_train_norm)
