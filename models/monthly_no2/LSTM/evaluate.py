@@ -46,7 +46,7 @@ test_dataloader = DataLoader(test_dataset, batch_size=batch_size)
 # Load the model
 filename = f"lstm_model_{age_category}_hl{hidden_layer_size}"
 if config.noise_standard_deviation:
-    filename += "_augmented"
+    filename += f"_augmented{config.noise_standard_deviation}".replace(".", "")
 checkpoint = torch.load(join(load_folder, filename+".tar"))
 model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=hidden_layer_size)
 print(model)
@@ -137,10 +137,12 @@ fig.subplots_adjust(top=0.5)
 fig.tight_layout(pad=2)
 
 if model_epoch == "best":
-    plot_filename = f"time_series_{age_category}_hl{hidden_layer_size}.png"
+    plot_filename = f"time_series_{age_category}_hl{hidden_layer_size}"
 elif model_epoch == "final":
-    plot_filename = f"time_series_{age_category}_overfit_hl{hidden_layer_size}.png"
-fig.savefig(join(load_folder, plot_filename), dpi=fig.dpi)
+    plot_filename = f"time_series_{age_category}_overfit_hl{hidden_layer_size}"
+if config.noise_standard_deviation:
+    plot_filename += f"_augmented{config.noise_standard_deviation}".replace(".", "")
+fig.savefig(join(load_folder, plot_filename+".png"), dpi=fig.dpi)
 # plt.show()
 
 

@@ -56,7 +56,7 @@ print(f"Model:\n{model}")
 # Train the LSTM model
 filename = f"lstm_model_{age_category}_hl{hidden_layer_size}"
 if config.noise_standard_deviation:
-    filename += "_augmented"
+    filename += f"_augmented{config.noise_standard_deviation}".replace(".", "")
 save_path = join(load_folder, filename+".tar")
 
 training_loss_history = []

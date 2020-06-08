@@ -37,7 +37,11 @@ training_dataloader = DataLoader(training_dataset, batch_size=batch_size)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size)
 
 # Load the model
-checkpoint = torch.load(join(load_folder,  f"lstm_model_{age_category}_hl{hidden_layer_size}.tar"))
+filename = f"lstm_model_{age_category}_hl{hidden_layer_size}"
+if config.noise_standard_deviation:
+    filename += f"_augmented{config.noise_standard_deviation}".replace(".", "")
+checkpoint = torch.load(join(load_folder, filename+".tar"))
+# checkpoint = torch.load(join(load_folder,  f"lstm_model_{age_category}_hl{hidden_layer_size}.tar"))
 model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=hidden_layer_size)
 
 training_losses = checkpoint["training_loss_history"]
@@ -59,7 +63,7 @@ if config.compute_test_loss:
     save_name += "_withtest"
     ax.plot(range(epochs+1), test_losses, label="test loss", alpha=0.8)
 if config.noise_standard_deviation:
-    save_name += "_augmented"
+    save_name += f"_augmented{config.noise_standard_deviation}".replace(".", "")
 ax.scatter(best_epoch, min(val_losses))
 plt.annotate(f"epoch {best_epoch}", (best_epoch*1.05, min(val_losses)))
 plt.legend()
