@@ -27,4 +27,4 @@ learning_rate = 0.001
 model_epoch = "best"  # Choose "final" or "best" model.
 
 compute_test_loss = True
-noise_standard_deviation = 0.3
+noise_standard_deviation = 0.3  # Standard deviation of Gaussian noise
