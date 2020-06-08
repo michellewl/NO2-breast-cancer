@@ -52,12 +52,12 @@ if config.compute_test_loss:
 
 fig, ax = plt.subplots(figsize=(12, 8))
 save_name = f"loss_history_{age_category}_hl{hidden_layer_size}.png"
-if config.compute_test_loss:
-    save_name = f"loss_history_{age_category}_hl{hidden_layer_size}_withtest.png"
-    ax.plot(range(epochs+1), test_losses, label="test loss", alpha=0.8)
 
 ax.plot(range(epochs+1), training_losses, label="training loss", alpha=0.8)
 ax.plot(range(epochs+1), val_losses, label="validation loss", alpha=0.8)
+if config.compute_test_loss:
+    save_name = f"loss_history_{age_category}_hl{hidden_layer_size}_withtest.png"
+    ax.plot(range(epochs+1), test_losses, label="test loss", alpha=0.8)
 ax.scatter(best_epoch, min(val_losses))
 plt.annotate(f"epoch {best_epoch}", (best_epoch*1.05, min(val_losses)))
 plt.legend()
