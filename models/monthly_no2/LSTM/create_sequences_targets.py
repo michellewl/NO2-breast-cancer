@@ -78,6 +78,8 @@ for ccg in ccgs:
         no2_df = pd.read_csv(join(no2_folder, no2_file)).set_index("MeasurementDateGMT")
         no2_df.index = pd.to_datetime(no2_df.index)
         no2_df = no2_df.loc[:, ccgs]
+        # if no2_df.isnull().values.any():
+        #     print(ccg)
         no2_df_list.append(no2_df)
     # print(no2_df_list)
 
@@ -194,7 +196,7 @@ np.save(join(save_folder, f"validation_targets_{age_category}.npy"), validation_
 np.save(join(save_folder, "test_sequences.npy"), test_inputs)
 np.save(join(save_folder, f"test_targets_{age_category}.npy"), y_test_norm)
 
-np.save(join(save_folder, "train_val_sequences.npy"), train_val_inputs)
-np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), y_train_norm)
+# np.save(join(save_folder, "train_val_sequences.npy"), train_val_inputs)
+# np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), y_train_norm)
 
 print("\nSaved npy arrays.")

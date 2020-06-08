@@ -7,8 +7,8 @@ training_window = 60  # consider the last X months of NO2 for each breast cancer
 aggregation = False  # Choose from ["mean"], or ["min", "max"]. Make this False if not using.
 quantile_step = 0.1  # Make this False if not using.
 
-ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[1]
+ccgs = ["all_ccgs"]  # ["NHS Central London (Westminster)", "NHS Richmond"]
+# ccg = ccgs[1]
 test_year = 2017
 
 dates_as_inputs = False

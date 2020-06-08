@@ -11,11 +11,11 @@ training_window = config.training_window  # consider the last X months of NO2 fo
 quantile_step = config.quantile_step  # Make this False if not using.
 
 ccgs = config.ccgs
-ccg = config.ccg
+#ccg = config.ccg
 
 # One age category
 age_category = config.age_category
-print(f"{ccg}\n{age_category}\n{training_window}-month training window")
+print(f"{ccgs}\n{age_category}\n{training_window}-month training window")
 
 hidden_layer_size = config.hidden_layer_size
 batch_size = config.batch_size
@@ -29,7 +29,7 @@ if quantile_step:
 else:
     aggregation = "_".join(config.aggregation)
 print(aggregation)
-load_folder = join(join(join(dirname(realpath(__file__)), ccg), aggregation), f"{training_window}_month_tw")
+load_folder = join(join(join(dirname(realpath(__file__)), "_".join(ccgs)), aggregation), f"{training_window}_month_tw")
 
 train_seq_path = join(load_folder, "training_sequences.npy")
 train_target_path = join(load_folder, f"training_targets_{age_category}.npy")
