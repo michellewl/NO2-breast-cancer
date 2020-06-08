@@ -42,6 +42,12 @@ validation_dataset = NO2Dataset(val_seq_path, val_target_path)
 training_dataloader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True)
 validation_dataloader = DataLoader(validation_dataset, batch_size=batch_size, shuffle=True)
 
+if config.compute_test_loss:
+    test_dataset = NO2Dataset(join(load_folder, "test_sequences.npy"), join(load_folder, f"test_targets_{age_category}.npy"))
+    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+    test_loss_sum = 0
+test_loss_history = []
+
 
 # Create model object of the LSTM class, define a loss function, define the optimiser.
 model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=hidden_layer_size)
@@ -79,7 +85,7 @@ for epoch in range(num_epochs):
         optimiser.step()
 
         running_loss += single_loss.item()
-        loss_sum += single_loss.item()*batch_size
+        loss_sum += single_loss.item()*data["targets"].shape[0]  # Account for different batch size with final batch
 
     # Print the loss after every X batches or after every Y epochs
         if batches_per_print and batch_num % batches_per_print == 0:
@@ -97,7 +103,16 @@ for epoch in range(num_epochs):
             targets_val = data["targets"]
             y_predict_validation = model(sequences_val)
             single_loss = criterion(y_predict_validation, targets_val)
-            validation_loss_sum += single_loss.item()*batch_size
+            validation_loss_sum += single_loss.item()*data["targets"].shape[0]
+            #print(f"Validation batch {batch_num} shape {targets_val.shape[0]}")
+        if config.compute_test_loss:
+            for batch_num, data in enumerate(test_dataloader):
+                sequences_test = data["sequences"]
+                targets_test = data["targets"]
+                y_predict_test = model(sequences_test)
+                single_loss = criterion(y_predict_test, targets_test)
+                test_loss_sum += single_loss.item()*data["targets"].shape[0]
+            test_loss_history.append(test_loss_sum / len(test_dataset))
     # Store the model with smallest validation loss. Check if the validation loss is the lowest BEFORE
     # saving it to loss history (otherwise it will not be lower than itself)
     if (not validation_loss_history) or validation_loss_sum / len(validation_dataset) < min(validation_loss_history):
@@ -115,7 +130,8 @@ for epoch in range(num_epochs):
             "training_loss_history": training_loss_history,
             "best_state_dict": best_model,
             "best_epoch": best_epoch,
-            "validation_loss_history": validation_loss_history
+            "validation_loss_history": validation_loss_history,
+            "test_loss_history": test_loss_history
         }, save_path)
 
 print(f"Finished training for {num_epochs} epochs.")
