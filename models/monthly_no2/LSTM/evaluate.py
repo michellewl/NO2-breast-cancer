@@ -62,14 +62,15 @@ model.eval()
 training_targets = []
 training_prediction = []
 
-for batch_num, data in enumerate(training_dataloader):
-    sequences = data["sequences"]
-    targets = data["targets"]
+with torch.no_grad():
+    for batch_num, data in enumerate(training_dataloader):
+        sequences = data["sequences"]
+        targets = data["targets"]
 
-    outputs = model(sequences)
+        outputs = model(sequences)
 
-    training_targets.append(targets.detach().numpy())
-    training_prediction.append(outputs.detach().numpy())
+        training_targets.append(targets.detach().numpy())
+        training_prediction.append(outputs.detach().numpy())
 
 y_normaliser = joblib.load(join(load_folder, f"y_{age_category}_normaliser.sav"))
 training_targets = y_normaliser.inverse_transform(np.concatenate(training_targets, axis=None))
@@ -83,14 +84,15 @@ print(f"Train R sq {train_rsq}\nTrain MSE {train_mse}")
 test_targets = []
 test_prediction = []
 
-for batch_num, data in enumerate(test_dataloader):
-    sequences = data["sequences"]
-    targets = data["targets"]
+with torch.no_grad():
+    for batch_num, data in enumerate(test_dataloader):
+        sequences = data["sequences"]
+        targets = data["targets"]
 
-    outputs = model(sequences)
+        outputs = model(sequences)
 
-    test_targets.append(targets.detach().numpy())
-    test_prediction.append(outputs.detach().numpy())
+        test_targets.append(targets.detach().numpy())
+        test_prediction.append(outputs.detach().numpy())
 
 test_targets = y_normaliser.inverse_transform(np.concatenate(test_targets, axis=None))
 test_prediction = y_normaliser.inverse_transform(np.concatenate(test_prediction, axis=None))
