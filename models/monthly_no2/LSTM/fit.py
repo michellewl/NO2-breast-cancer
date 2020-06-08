@@ -36,7 +36,7 @@ train_target_path = join(load_folder, f"training_targets_{age_category}.npy")
 val_seq_path = join(load_folder, "validation_sequences.npy")
 val_target_path = join(load_folder, f"validation_targets_{age_category}.npy")
 
-training_dataset = NO2Dataset(train_seq_path, train_target_path)
+training_dataset = NO2Dataset(train_seq_path, train_target_path, noise_std=config.noise_standard_deviation)
 validation_dataset = NO2Dataset(val_seq_path, val_target_path)
 
 training_dataloader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True)
@@ -54,8 +54,10 @@ optimiser = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
 print(f"Model:\n{model}")
 
 # Train the LSTM model
-filename = f"lstm_model_{age_category}_hl{hidden_layer_size}.tar"
-save_path = join(load_folder, filename)
+filename = f"lstm_model_{age_category}_hl{hidden_layer_size}"
+if config.noise_standard_deviation:
+    filename += "_augmented"
+save_path = join(load_folder, filename+".tar")
 
 training_loss_history = []
 validation_loss_history = []

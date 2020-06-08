@@ -24,6 +24,7 @@ random_seed = 1
 
 learning_rate = 0.001
 
-model_epoch = "final"  # Choose "final" or "best" model.
+model_epoch = "best"  # Choose "final" or "best" model.
 
 compute_test_loss = True
+noise_standard_deviation = 0.1

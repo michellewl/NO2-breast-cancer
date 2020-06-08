@@ -51,13 +51,15 @@ if config.compute_test_loss:
 # Plot training and validation loss history and annotate the epoch with best validation loss
 
 fig, ax = plt.subplots(figsize=(12, 8))
-save_name = f"loss_history_{age_category}_hl{hidden_layer_size}.png"
+save_name = f"loss_history_{age_category}_hl{hidden_layer_size}"
 
 ax.plot(range(epochs+1), training_losses, label="training loss", alpha=0.8)
 ax.plot(range(epochs+1), val_losses, label="validation loss", alpha=0.8)
 if config.compute_test_loss:
-    save_name = f"loss_history_{age_category}_hl{hidden_layer_size}_withtest.png"
+    save_name += "_withtest"
     ax.plot(range(epochs+1), test_losses, label="test loss", alpha=0.8)
+if config.noise_standard_deviation:
+    save_name += "_augmented"
 ax.scatter(best_epoch, min(val_losses))
 plt.annotate(f"epoch {best_epoch}", (best_epoch*1.05, min(val_losses)))
 plt.legend()
@@ -66,4 +68,4 @@ plt.ylabel("MSE loss")
 plt.title(f"LSTM training loss for {ccg}")
 # plt.show()
 fig.tight_layout()
-fig.savefig(join(load_folder, save_name), dpi=fig.dpi)
+fig.savefig(join(load_folder, save_name+".png"), dpi=fig.dpi)
