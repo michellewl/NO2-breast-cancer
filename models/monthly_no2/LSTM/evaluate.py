@@ -166,6 +166,4 @@ for ccg in ccgs:
         plot_filename += f"_augmented{config.noise_standard_deviation}".replace(".", "")
     fig.savefig(join(save_folder, plot_filename+".png"), dpi=fig.dpi)
     # plt.show()
-
-
-
+    plt.close()
