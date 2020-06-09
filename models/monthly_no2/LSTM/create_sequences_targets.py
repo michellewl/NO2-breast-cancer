@@ -70,6 +70,8 @@ val_seq_list =[]
 val_targ_list = []
 test_seq_list = []
 test_targ_list = []
+training_meta_list = []
+test_meta_list =[]
 print("Processing CCGs...")
 for ccg in ccgs:
     no2_df_list = []
@@ -175,6 +177,17 @@ for ccg in ccgs:
     test_targ_list.append(y_test_norm)
     train_val_seq_list.append(train_val_inputs)
     train_val_targ_list.append(y_train_norm)
+
+    training_date_array = ncras_df.loc[(ncras_df.index.year != test_year) & (ncras_df.ccg_name == ccg), age_category].index.map(str).to_numpy().reshape(-1, 1)
+    test_date_array = ncras_df.loc[(ncras_df.index.year == test_year) & (ncras_df.ccg_name == ccg), age_category].index.map(str).to_numpy().reshape(-1, 1)
+    ccg_train_array = np.repeat(np.array([ccg]), training_date_array.shape[0]).reshape(-1, 1)
+    ccg_test_array = np.repeat(np.array([ccg]), test_date_array.shape[0]).reshape(-1, 1)
+    training_meta_array = np.concatenate((training_date_array, ccg_train_array), axis=1)
+    test_meta_array = np.concatenate((test_date_array, ccg_test_array), axis=1)
+    # print(training_meta_array.shape, test_meta_array.shape)
+
+    training_meta_list.append(training_meta_array)
+    test_meta_list.append(test_meta_array)
     # print(f"\nTraining sequences {training_sequences.shape}\nValidation sequences {validation_sequences.shape}")
     # print(f"Training targets {training_targets.shape}\nValidation targets {validation_targets.shape}")
     # print(f"\nTest sequences {test_inputs.shape}\nTest targets {y_test_norm.shape}")
@@ -187,16 +200,15 @@ test_sequences = np.concatenate(test_seq_list, axis=0)
 test_targets = np.concatenate(test_targ_list, axis=0)
 train_val_sequences = np.concatenate(train_val_seq_list, axis=0)
 train_val_targets = np.concatenate(train_val_targ_list, axis=0)
-# print(np.isnan(training_sequences).shape)
-# print(np.isnan(training_sequences).any(axis=(1)).shape)
-# print(np.logical_not(np.isnan(training_sequences).any(axis=(1, 2))).shape)
-#
-# indices_of_sequences_to_keep = np.logical_not(np.isnan(training_sequences).any(axis=(1, 2)))
-# sequences_without_nans = training_sequences[indices_of_sequences_to_keep]
+
+training_dates = np.concatenate(training_meta_list, axis=0)
+test_dates = np.concatenate(test_meta_list, axis=0)
+
 print(f"\nDropping NaNs\nTraining {np.isnan(training_sequences).any(axis=(1, 2)).sum()}\n"
       f"Validation {np.isnan(validation_sequences).any(axis=(1, 2)).sum()}\n"
             f"Train/val {np.isnan(train_val_sequences).any(axis=(1, 2)).sum()}\n"
       f"Test {np.isnan(test_sequences).any(axis=(1, 2)).sum()}")
+
 # Look along dimensions 1 & 2 for NaNs
 training_sequences_dropna = training_sequences[np.logical_not(np.isnan(training_sequences).any(axis=(1, 2)))]
 training_targets_dropna = training_targets[np.logical_not(np.isnan(training_sequences).any(axis=(1, 2)))]
@@ -206,11 +218,17 @@ train_val_sequences_dropna = train_val_sequences[np.logical_not(np.isnan(train_v
 train_val_targets_dropna = train_val_targets[np.logical_not(np.isnan(train_val_sequences).any(axis=(1, 2)))]
 test_sequences_dropna = test_sequences[np.logical_not(np.isnan(test_sequences).any(axis=(1, 2)))]
 test_targets_dropna = test_targets[np.logical_not(np.isnan(test_sequences).any(axis=(1, 2)))]
+training_dates_dropna = training_dates[np.logical_not(np.isnan(train_val_sequences).any(axis=(1, 2)))]
+test_dates_dropna = test_dates[np.logical_not(np.isnan(test_sequences).any(axis=(1, 2)))]
 
-print(f"\nTraining sequences {training_sequences_dropna.shape}\nTraining targets {training_targets_dropna.shape}")
-print(f"Validation sequences {validation_sequences_dropna.shape}\nValidation targets {validation_targets_dropna.shape}")
-print(f"Train/val sequences {train_val_sequences_dropna.shape}\nValidation targets {train_val_targets_dropna.shape}")
-print(f"Test sequences {test_sequences_dropna.shape}\nTest targets {test_targets_dropna.shape}")
+
+print(f"\nTraining sequences {training_sequences_dropna.shape} Training targets {training_targets_dropna.shape}")
+print(f"Validation sequences {validation_sequences_dropna.shape} Validation targets {validation_targets_dropna.shape}")
+print(f"Train/val sequences {train_val_sequences_dropna.shape} Train/val targets {train_val_targets_dropna.shape}")
+print(f"Test sequences {test_sequences_dropna.shape} Test targets {test_targets_dropna.shape}")
+
+print(f"Training dates {training_dates_dropna.shape} Test dates {test_dates_dropna.shape}")
+
 
 np.save(join(save_folder, "training_sequences.npy"), training_sequences_dropna)
 np.save(join(save_folder, "validation_sequences.npy"), validation_sequences_dropna)
@@ -222,7 +240,10 @@ np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), train_val_ta
 np.save(join(save_folder, "test_sequences.npy"), test_sequences_dropna)
 np.save(join(save_folder, f"test_targets_{age_category}.npy"), test_targets_dropna)
 
-# np.save(join(save_folder, "train_val_sequences.npy"), train_val_inputs)
-# np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), y_train_norm)
+np.save(join(save_folder, "train_val_sequences.npy"), train_val_sequences_dropna)
+np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), train_val_targets_dropna)
+
+np.save(join(save_folder, "train_val_dates.npy"), training_dates_dropna)
+np.save(join(save_folder, f"test_dates_{age_category}.npy"), test_dates_dropna)
 
 print("\nSaved npy arrays.")
