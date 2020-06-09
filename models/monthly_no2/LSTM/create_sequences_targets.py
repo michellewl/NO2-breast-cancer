@@ -42,7 +42,11 @@ ncras_filename = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.
 if quantile_step:
     aggregation = [str(len(aggregation)-1), "quantiles"]
 
-save_folder = join(join(join(dirname(realpath(__file__)), "_".join(ccgs)), "_".join(aggregation)), f"{training_window}_month_tw")
+if len(ccgs) > 1:
+    save_folder = join(join(join(dirname(realpath(__file__)), "_".join(ccgs)), "_".join(aggregation)), f"{training_window}_month_tw")
+else:
+    save_folder = join(join(join(dirname(realpath(__file__)), ccgs[0]), "_".join(aggregation)),
+                       f"{training_window}_month_tw")
 if not exists(save_folder):
     makedirs(save_folder)
 
