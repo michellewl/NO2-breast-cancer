@@ -62,7 +62,8 @@ no2_start_test_date, no2_end_test_date = ncras_end_date - relativedelta(months=t
                                          ncras_end_date - relativedelta(months=1)
 # print(ncras_start_date, no2_start_training_date, no2_end_training_date)
 # print(ncras_end_date, no2_start_test_date, no2_end_test_date)
-
+train_val_seq_list = []
+train_val_targ_list = []
 train_seq_list =[]
 train_targ_list = []
 val_seq_list =[]
@@ -172,6 +173,8 @@ for ccg in ccgs:
     val_targ_list.append(validation_targets)
     test_seq_list.append(test_inputs)
     test_targ_list.append(y_test_norm)
+    train_val_seq_list.append(train_val_inputs)
+    train_val_targ_list.append(y_train_norm)
     # print(f"\nTraining sequences {training_sequences.shape}\nValidation sequences {validation_sequences.shape}")
     # print(f"Training targets {training_targets.shape}\nValidation targets {validation_targets.shape}")
     # print(f"\nTest sequences {test_inputs.shape}\nTest targets {y_test_norm.shape}")
@@ -182,6 +185,8 @@ validation_sequences = np.concatenate(val_seq_list, axis=0)
 validation_targets = np.concatenate(val_targ_list, axis=0)
 test_sequences = np.concatenate(test_seq_list, axis=0)
 test_targets = np.concatenate(test_targ_list, axis=0)
+train_val_sequences = np.concatenate(train_val_seq_list, axis=0)
+train_val_targets = np.concatenate(train_val_targ_list, axis=0)
 # print(np.isnan(training_sequences).shape)
 # print(np.isnan(training_sequences).any(axis=(1)).shape)
 # print(np.logical_not(np.isnan(training_sequences).any(axis=(1, 2))).shape)
@@ -190,23 +195,29 @@ test_targets = np.concatenate(test_targ_list, axis=0)
 # sequences_without_nans = training_sequences[indices_of_sequences_to_keep]
 print(f"\nDropping NaNs\nTraining {np.isnan(training_sequences).any(axis=(1, 2)).sum()}\n"
       f"Validation {np.isnan(validation_sequences).any(axis=(1, 2)).sum()}\n"
+            f"Train/val {np.isnan(train_val_sequences).any(axis=(1, 2)).sum()}\n"
       f"Test {np.isnan(test_sequences).any(axis=(1, 2)).sum()}")
 # Look along dimensions 1 & 2 for NaNs
 training_sequences_dropna = training_sequences[np.logical_not(np.isnan(training_sequences).any(axis=(1, 2)))]
 training_targets_dropna = training_targets[np.logical_not(np.isnan(training_sequences).any(axis=(1, 2)))]
 validation_sequences_dropna = validation_sequences[np.logical_not(np.isnan(validation_sequences).any(axis=(1, 2)))]
 validation_targets_dropna = validation_targets[np.logical_not(np.isnan(validation_sequences).any(axis=(1, 2)))]
+train_val_sequences_dropna = train_val_sequences[np.logical_not(np.isnan(train_val_sequences).any(axis=(1, 2)))]
+train_val_targets_dropna = train_val_targets[np.logical_not(np.isnan(train_val_sequences).any(axis=(1, 2)))]
 test_sequences_dropna = test_sequences[np.logical_not(np.isnan(test_sequences).any(axis=(1, 2)))]
 test_targets_dropna = test_targets[np.logical_not(np.isnan(test_sequences).any(axis=(1, 2)))]
 
 print(f"\nTraining sequences {training_sequences_dropna.shape}\nTraining targets {training_targets_dropna.shape}")
 print(f"Validation sequences {validation_sequences_dropna.shape}\nValidation targets {validation_targets_dropna.shape}")
+print(f"Train/val sequences {train_val_sequences_dropna.shape}\nValidation targets {train_val_targets_dropna.shape}")
 print(f"Test sequences {test_sequences_dropna.shape}\nTest targets {test_targets_dropna.shape}")
 
 np.save(join(save_folder, "training_sequences.npy"), training_sequences_dropna)
 np.save(join(save_folder, "validation_sequences.npy"), validation_sequences_dropna)
 np.save(join(save_folder, f"training_targets_{age_category}.npy"), training_targets_dropna)
 np.save(join(save_folder, f"validation_targets_{age_category}.npy"), validation_targets_dropna)
+np.save(join(save_folder, "train_val_sequences.npy"), train_val_sequences_dropna)
+np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), train_val_targets_dropna)
 
 np.save(join(save_folder, "test_sequences.npy"), test_sequences_dropna)
 np.save(join(save_folder, f"test_targets_{age_category}.npy"), test_targets_dropna)
