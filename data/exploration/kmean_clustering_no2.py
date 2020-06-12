@@ -33,7 +33,7 @@ if quantile_step:
     aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
 
 
-no2_folder = join(join(join(dirname(dirname(realpath(__file__))), "LAQN"), f"{laqn_start_date}_{laqn_end_date}"), "monthly")
+no2_folder = join(dirname(dirname(realpath(__file__))), "LAQN", f"{laqn_start_date}_{laqn_end_date}", "monthly")
 no2_filenames = [file for method in aggregation for file in listdir(no2_folder) if re.findall(f"ccgs_monthly_{method}.csv", file)]
 print(no2_filenames)
 
