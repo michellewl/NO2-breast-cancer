@@ -4,6 +4,7 @@ from os import listdir, makedirs
 from os.path import join, dirname, realpath, exists
 import re
 import pandas as pd
+import geopandas as gpd
 
 # X = np.array([[1, 2], [1, 4], [1, 0], [10, 2], [10, 4], [10, 0]])
 # print(X.shape)
@@ -72,7 +73,32 @@ kmeans = KMeans(n_clusters=3, random_state=1)
 kmeans.fit(no2_array)
 # print(f"Assigned clusters {kmeans.labels_}")
 
-for i in range(len(cluster_ccgs)):
-    print(f"{cluster_ccgs[i]} assigned to cluster {kmeans.labels_[i]}")
+# for i in range(len(cluster_ccgs)):
+#     print(f"{cluster_ccgs[i]} assigned to cluster {kmeans.labels_[i]}")
 
 print(f"Cluster centres {kmeans.cluster_centers_}")
+ccg_cluster_df = pd.DataFrame()
+ccg_cluster_df["ccg"] = cluster_ccgs
+ccg_cluster_df["cluster_label"] = kmeans.labels_
+# print(cluster_df)
+
+# Load London map ------------------------------------------------------------------------------------------
+load_folder = join(dirname(realpath(__file__)), "London_GIS", "statistical-gis-boundaries-london", "ESRI")
+filename = "London_Borough_Excluding_MHW.shp"
+
+map_df = gpd.read_file(join(load_folder, filename))
+# print(map_df["NAME"])
+# map_df.plot()
+# plt.show()
+
+borough_cluster_df = pd.DataFrame()
+# Map London boroughs to clustered CCGs to get clustered boroughs.
+for borough in map_df["NAME"]:
+    for ccg in cluster_ccgs:
+        cluster_label = ccg_cluster_df.loc[ccg_cluster_df["ccg"] == ccg, "cluster_label"].values[0]
+        ccg_names = ccg.replace("NHS ", "").replace("(", "").replace(")", "").replace(",", "")
+        match = set(borough.split()).intersection(ccg_names.split())
+        if (len(match) == 1 and "and" not in match and "London" not in match) or (len(match) > 1):
+            df = pd.DataFrame([(borough, ccg, cluster_label)], columns=["borough", "ccg", "cluster_label"])
+            borough_cluster_df = borough_cluster_df.append(df, ignore_index=True)
+print(borough_cluster_df)
