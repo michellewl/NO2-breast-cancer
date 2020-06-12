@@ -9,5 +9,7 @@
 *.npy
 *.sav
 *.tar
+*/London_GIS/
+
 
 
