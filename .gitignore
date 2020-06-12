@@ -9,7 +9,7 @@
 *.npy
 *.sav
 *.tar
-*/London_GIS/
+/data/exploration/London_GIS/
 
 
 
