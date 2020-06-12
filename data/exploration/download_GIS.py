@@ -19,6 +19,6 @@ for url in urls:
     file_request = requests.get(url)
     zipfile = zp.ZipFile(io.BytesIO(file_request.content))
     print("Extracting...")
-    zipfile.extractall(join(save_folder))
+    zipfile.extractall(save_folder)
 
 print("Complete.")
