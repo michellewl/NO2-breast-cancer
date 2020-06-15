@@ -8,7 +8,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import seaborn as sns
-sns.set()
+import adjustText as aT
 
 variable = "no2"  # ncras or no2
 cluster_start_year = 2013
@@ -95,6 +95,13 @@ ccg_cluster_df.to_csv(f"{variable}_{number_of_clusters}_clusters_{cluster_start_
 load_folder = join(dirname(realpath(__file__)), "London_GIS", "statistical-gis-boundaries-london", "ESRI")
 filename = "London_Borough_Excluding_MHW.shp"
 map_df = gpd.read_file(join(load_folder, filename))
+print(map_df.columns)
+
+# Set up borough names for map plotting
+map_labels_df = map_df.copy()
+map_labels_df["rep"] = map_labels_df["geometry"].representative_point()
+map_labels_df["centre"] = map_labels_df["geometry"].centroid
+map_labels_df.set_geometry("centre", inplace=True)
 
 # Create dataframe of cluster labels for each London borough - we need this to be able to plot the map
 borough_cluster_df = pd.DataFrame()
@@ -111,18 +118,35 @@ print(borough_cluster_df.shape)
 
 # Now prepare a dataframe for plotting the London map.
 merge_df = map_df.set_index("NAME").join(borough_cluster_df.set_index("borough"))
+merge_df["cluster_label"] = merge_df["cluster_label"].astype("Int64")
 #merge_df.fillna(value={"cluster_label": 0}, inplace=True)
 print(merge_df.shape)
 
 # Plot the London map
-fig, ax = plt.subplots(1, figsize=(10, 6))
+font_size = 20
+
+# Create figure and set colour scheme
+fig, ax = plt.subplots(1, figsize=(20, 12))
 cmap = ListedColormap(sns.color_palette("Paired").as_hex())
-merge_df.plot(column="cluster_label", categorical=True, linewidth=0.8, ax=ax, edgecolor="grey", cmap=cmap,
-              legend=True, missing_kwds={"color": "lightgrey", "edgecolor": "grey", "hatch": "///", "label": "Missing values"})
+
+# Plot London boroughs with centre point markers and labels
+merge_df.plot(column="cluster_label", categorical=True, linewidth=0.8, ax=ax, edgecolor="grey", cmap=cmap, legend=True,
+              legend_kwds={"fontsize": font_size*0.8},
+              missing_kwds={"color": "lightgrey", "edgecolor": "grey", "hatch": "///", "label": "Missing values"})
+map_labels_df.plot(ax=ax, marker="o", color="black", markersize=8)
+borough_text = []
+for x, y, label in zip(map_labels_df.geometry.x, map_labels_df.geometry.y, map_labels_df["NAME"]):
+    borough_text.append(plt.text(x, y, label, fontsize=font_size*0.6))
+
+# Remove x and y axes from the plot, set the title and annotation
 ax.axis("off")
-ax.set_title(f"London {variable_name} k-means clustering")
-ax.annotate(f"Clustered on data from {cluster_start_year} to {cluster_end_year}",xy=(0.1, .08),
-            xycoords="figure fraction", horizontalalignment="left", verticalalignment="top", fontsize=12, color="#555555")
+ax.set_title(f"London {variable_name} k-means clustering", fontsize=font_size*1)
+ax.annotate(f"Clustered on data from {cluster_start_year} to {cluster_end_year}", xy=(0.1, .08),
+            xycoords="figure fraction", horizontalalignment="left", verticalalignment="top", fontsize=font_size*0.8, color="#555555")
+
+# Adjust spacing for the borough labels so that text boxes don't overlap
+aT.adjust_text(borough_text, expand_points=(1, 1), expand_text=(1, 1))
+
 plt.show()
 
 fig.savefig(f"{variable}_{number_of_clusters}_clusters_{cluster_start_year}-{cluster_end_year}.png", dpi=fig.dpi)
