@@ -133,7 +133,7 @@ cmap = ListedColormap(sns.color_palette("Paired").as_hex())
 merge_df.plot(column="cluster_label", categorical=True, linewidth=0.8, ax=ax, edgecolor="grey", cmap=cmap, legend=True,
               legend_kwds={"fontsize": font_size*0.8},
               missing_kwds={"color": "lightgrey", "edgecolor": "grey", "hatch": "///", "label": "Missing values"})
-map_labels_df.plot(ax=ax, marker="o", color="black", markersize=8)
+map_labels_df.plot(ax=ax, marker="o", color="black", markersize=font_size*0.4)
 borough_text = []
 for x, y, label in zip(map_labels_df.geometry.x, map_labels_df.geometry.y, map_labels_df["NAME"]):
     borough_text.append(plt.text(x, y, label, fontsize=font_size*0.6))
