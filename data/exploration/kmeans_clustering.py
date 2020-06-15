@@ -147,6 +147,7 @@ ax.annotate(f"Clustered on data from {cluster_start_year} to {cluster_end_year}"
 # Adjust spacing for the borough labels so that text boxes don't overlap
 aT.adjust_text(borough_text, expand_points=(1, 1), expand_text=(1, 1))
 
+# Display the plot and save as a PNG file.
 plt.show()
 
 fig.savefig(f"{variable}_{number_of_clusters}_clusters_{cluster_start_year}-{cluster_end_year}.png", dpi=fig.dpi)
