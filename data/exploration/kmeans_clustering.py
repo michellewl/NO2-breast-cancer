@@ -10,10 +10,10 @@ from matplotlib.colors import ListedColormap
 import seaborn as sns
 import adjustText as aT
 
-variable = "no2"  # ncras or no2
+variable = "both_ncras_no2"  # ncras or no2
 cluster_start_year = 2013
 cluster_end_year = 2018
-number_of_clusters = 3
+number_of_clusters = 6
 
 laqn_start_date = "1997-01-01"
 laqn_end_date = "2018-01-01"
@@ -27,6 +27,8 @@ if variable == "ncras":
     variable_name = "breast cancer"
 elif variable == "no2":
     variable_name = "NO$_2$"
+elif variable == "both_ncras_no2":
+    variable_name = "breast cancer and NO$_2$"
 
 if quantile_step:
     aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
@@ -34,20 +36,22 @@ if quantile_step:
 # Get NO2 data filenames
 no2_folder = join(dirname(dirname(realpath(__file__))), "LAQN", f"{laqn_start_date}_{laqn_end_date}", "monthly")
 no2_filenames = [file for method in aggregation for file in listdir(no2_folder) if re.findall(f"ccgs_monthly_{method}.csv", file)]
-print(no2_filenames)
+print(f"\nNO2 filenames:\n{no2_filenames}")
 
 # Get NCRAS data filename
 ncras_folder = join(dirname(dirname(realpath(__file__))), "NCRAS")
-ncras_filenames = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.csv" in f][0]
-ncras_df = pd.read_csv(join(ncras_folder, ncras_filenames)).set_index("date")
+ncras_filenames = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.csv" in f]
+print(f"NCRAS filenames:\n{ncras_filenames}")
+ncras_df = pd.read_csv(join(ncras_folder, ncras_filenames[0])).set_index("date")
 ncras_df.index = pd.to_datetime(ncras_df.index)
 
 # Get list of all CCG names
 if ccgs == ["all_ccgs"]:
     ccgs = ncras_df["ccg_name"].unique().tolist()
-print(len(ccgs))
+print(f"\n{len(ccgs)} CCGs found.")
 
 # Calculate data on which to perform clustering
+print(f"Variable for clustering: {variable_name}\n")
 cluster_ccgs = ccgs.copy()
 ccg_arrays = []
 for ccg in ccgs:
@@ -64,17 +68,34 @@ for ccg in ccgs:
         ccg_array = ncras_df.loc[(ncras_df.index.year >= cluster_start_year)
                                  & (ncras_df.index.year < cluster_end_year) & (ncras_df["ccg_name"] == ccg),
                                  age_category].resample("A").mean().values.reshape(1, -1)
+    elif variable == "both_ncras_no2":
+        arrays = []
+        for file in no2_filenames:
+            df = pd.read_csv(join(no2_folder, file)).set_index("MeasurementDateGMT")
+            df.index = pd.to_datetime(df.index)
+            df = df.loc[(df.index.year >= cluster_start_year) & (df.index.year < cluster_end_year), ccg].resample(
+                "A").mean()
+            array = df.values.reshape(-1, 1)
+            arrays.append(array)
+        no2_ccg_array = np.concatenate(arrays, axis=1).reshape(1, -1,
+                                                           len(aggregation))  # Annual average of monthly X for one CCG.
+        # print(no2_ccg_array.shape)
+        ncras_ccg_array = ncras_df.loc[(ncras_df.index.year >= cluster_start_year)
+                                 & (ncras_df.index.year < cluster_end_year) & (ncras_df["ccg_name"] == ccg),
+                                 age_category].resample("A").mean().values.reshape(1, -1, 1)
+        # print(ncras_ccg_array.shape)
+        ccg_array = np.concatenate([no2_ccg_array, ncras_ccg_array], axis=2)
     if np.isnan(ccg_array).any():
         print(f"NaNs in {ccg}, skipped.")
         cluster_ccgs.remove(ccg)
     else:
         ccg_arrays.append(ccg_array)
 annual_ccgs_array = np.concatenate(ccg_arrays, axis=0)
-print(annual_ccgs_array.shape)
+print(f"\nAnnual data {annual_ccgs_array.shape}")
 
 cluster_array = np.mean(annual_ccgs_array, axis=1).reshape(len(cluster_ccgs), -1)  # 5-year average of monthly X for each CCG.
-print(cluster_array.shape)
-print(f"Retained {len(cluster_ccgs)} CCGs.")
+print(f"{cluster_end_year - cluster_start_year}-year mean data {cluster_array.shape}")
+print(f"\nRetained {len(cluster_ccgs)} CCGs.")
 
 # Perform clustering
 print("\nK-MEANS CLUSTERING\n")
@@ -131,7 +152,7 @@ cmap = ListedColormap(sns.color_palette("Paired").as_hex())
 
 # Plot London boroughs with centre point markers and labels
 merge_df.plot(column="cluster_label", categorical=True, linewidth=0.8, ax=ax, edgecolor="grey", cmap=cmap, legend=True,
-              legend_kwds={"fontsize": font_size*0.8},
+              legend_kwds={"fontsize": font_size*0.8, "label": "Clusters"},
               missing_kwds={"color": "lightgrey", "edgecolor": "grey", "hatch": "///", "label": "Missing values"})
 map_labels_df.plot(ax=ax, marker="o", color="black", markersize=font_size*0.4)
 borough_text = []
