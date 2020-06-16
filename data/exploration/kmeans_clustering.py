@@ -13,7 +13,7 @@ import adjustText as aT
 variable = "both_ncras_no2"  # ncras or no2
 cluster_start_year = 2013
 cluster_end_year = 2018
-number_of_clusters = 6
+number_of_clusters = 4
 
 laqn_start_date = "1997-01-01"
 laqn_end_date = "2018-01-01"
@@ -116,7 +116,7 @@ ccg_cluster_df.to_csv(f"{variable}_{number_of_clusters}_clusters_{cluster_start_
 load_folder = join(dirname(realpath(__file__)), "London_GIS", "statistical-gis-boundaries-london", "ESRI")
 filename = "London_Borough_Excluding_MHW.shp"
 map_df = gpd.read_file(join(load_folder, filename))
-print(map_df.columns)
+# print(map_df.columns)
 
 # Set up borough names for map plotting
 map_labels_df = map_df.copy()
@@ -135,13 +135,13 @@ for borough in map_df["NAME"]:
         if (len(match) == 1 and "and" not in match and "London" not in match) or (len(match) > 1):
             df = pd.DataFrame([(borough, cluster_label)], columns=["borough", "cluster_label"])
             borough_cluster_df = borough_cluster_df.append(df, ignore_index=True)
-print(borough_cluster_df.shape)
+print(f"Clustered boroughs and variables {borough_cluster_df.shape}")
 
 # Now prepare a dataframe for plotting the London map.
 merge_df = map_df.set_index("NAME").join(borough_cluster_df.set_index("borough"))
 merge_df["cluster_label"] = merge_df["cluster_label"].astype("Int64")
 #merge_df.fillna(value={"cluster_label": 0}, inplace=True)
-print(merge_df.shape)
+print(f"All boroughs, shape info and clustered variables {merge_df.shape}")
 
 # Plot the London map
 font_size = 20
@@ -152,7 +152,7 @@ cmap = ListedColormap(sns.color_palette("Paired").as_hex())
 
 # Plot London boroughs with centre point markers and labels
 merge_df.plot(column="cluster_label", categorical=True, linewidth=0.8, ax=ax, edgecolor="grey", cmap=cmap, legend=True,
-              legend_kwds={"fontsize": font_size*0.8, "label": "Clusters"},
+              legend_kwds={"fontsize": font_size*0.8},
               missing_kwds={"color": "lightgrey", "edgecolor": "grey", "hatch": "///", "label": "Missing values"})
 map_labels_df.plot(ax=ax, marker="o", color="black", markersize=font_size*0.4)
 borough_text = []
