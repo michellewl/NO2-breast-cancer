@@ -1,6 +1,5 @@
 import torch
 from torch.utils.data import Dataset
-import joblib
 import numpy as np
 
 class NO2Dataset(Dataset):
@@ -25,5 +24,3 @@ class NO2Dataset(Dataset):
             noise = torch.randn_like(input)*self.noise_std
             input = input + noise
         return {"sequences": input, "targets": target}
-
-
