@@ -11,14 +11,14 @@ ccgs = ["clustered_ccgs"]  #["NHS Hammersmith and Fulham", "NHS Central London (
 # ["NHS Richmond"]
 # ["all_ccgs"]
 cluster_label = 1
-n_clusters = 4
+n_clusters = 2
 cluster_variables = "both_ncras_no2"
 
 test_year = 2017
 
 dates_as_inputs = False
 
-age_category = "all_ages"
+age_category = "age_cat_>=70"  #"age_cat_<40"  #"age_cat_40-69"  #"all_ages"
 
 hidden_layer_size = 4
 batch_size = 30

@@ -21,6 +21,7 @@ test_year = config.test_year
 model_epoch = config.model_epoch
 age_category = config.age_category
 print(f"{ccgs}\n{age_category}")
+age_category = age_category.replace("<", "").replace(">=", "")
 hidden_layer_size = config.hidden_layer_size
 batch_size = config.batch_size
 torch.manual_seed(config.random_seed)

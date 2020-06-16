@@ -13,6 +13,7 @@ quantile_step = config.quantile_step
 ccgs = config.ccgs
 age_category = config.age_category
 print(f"{ccgs}\n{age_category}\n{training_window}-month training window")
+age_category = age_category.replace("<", "").replace(">=", "")
 
 hidden_layer_size = config.hidden_layer_size
 batch_size = config.batch_size

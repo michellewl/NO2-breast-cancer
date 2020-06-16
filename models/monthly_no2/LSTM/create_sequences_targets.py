@@ -20,6 +20,7 @@ quantile_step = config.quantile_step
 ccgs = config.ccgs
 age_category = config.age_category
 print(f"{ccgs}\n{age_category}")
+age_category_rename = age_category.replace("<", "").replace(">=", "")  # Can't have < or > in filepaths
 test_year = config.test_year
 
 # Determine the appropriate monthly aggregation statistics for NO2
@@ -133,7 +134,7 @@ for ccg in ccgs:
     y_normaliser = StandardScaler().fit(y_train)
     # Save to later apply un-normalisation to test sets for plotting/evaluation
     joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
-    joblib.dump(y_normaliser, join(save_folder, f"y_{age_category}_normaliser.sav"))
+    joblib.dump(y_normaliser, join(save_folder, f"y_{age_category_rename}_normaliser.sav"))
     # Normalise input and output data
     x_train_norm = x_normaliser.transform(x_train)
     y_train_norm = y_normaliser.transform(y_train).squeeze()
@@ -211,6 +212,7 @@ print(f"Test sequences {test_sequences_dropna.shape} Test targets {test_targets_
 print(f"Training dates {training_dates_dropna.shape} Test dates {test_dates_dropna.shape}")
 
 # Save the arrays
+age_category = age_category_rename  # Can't have < or > in filepaths
 np.save(join(save_folder, "training_sequences.npy"), training_sequences_dropna)
 np.save(join(save_folder, "validation_sequences.npy"), validation_sequences_dropna)
 np.save(join(save_folder, f"training_targets_{age_category}.npy"), training_targets_dropna)
