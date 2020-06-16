@@ -27,7 +27,11 @@ if quantile_step:
     aggregation = f"{int(1/quantile_step)}_quantiles"
 else:
     aggregation = "_".join(config.aggregation)
-load_folder = join(join(join(dirname(realpath(__file__)), "_".join(ccgs)), aggregation), f"{training_window}_month_tw")
+load_folder = join(dirname(realpath(__file__)), "_".join(ccgs), aggregation, f"{training_window}_month_tw")
+
+if ccgs == ["clustered_ccgs"]:
+    label = f"cluster_{config.cluster_label}of{config.n_clusters}"
+    load_folder = join(dirname(realpath(__file__)), ccgs[0], label, aggregation, f"{training_window}_month_tw")
 
 # Load train & test data
 training_dataset = NO2Dataset(join(load_folder, "training_sequences.npy"), join(load_folder, f"training_targets_{age_category}.npy"))

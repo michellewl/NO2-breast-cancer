@@ -29,7 +29,11 @@ if quantile_step:
 else:
     aggregation = "_".join(config.aggregation)
 print(aggregation)
-load_folder = join(join(join(dirname(realpath(__file__)), "_".join(ccgs)), aggregation), f"{training_window}_month_tw")
+load_folder = join(dirname(realpath(__file__)), "_".join(ccgs), aggregation, f"{training_window}_month_tw")
+
+if ccgs == ["clustered_ccgs"]:
+    label = f"cluster_{config.cluster_label}of{config.n_clusters}"
+    load_folder = join(dirname(realpath(__file__)), ccgs[0], label, aggregation, f"{training_window}_month_tw")
 
 train_seq_path = join(load_folder, "training_sequences.npy")
 train_target_path = join(load_folder, f"training_targets_{age_category}.npy")

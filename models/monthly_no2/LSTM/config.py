@@ -5,10 +5,15 @@ laqn_end_date = "2018-01-01"
 training_window = 60  # consider the last X months of NO2 for each breast cancer diagnosis month
 
 aggregation = False  # Choose from ["mean"], or ["min", "max"]. Make this False if not using.
-quantile_step = 0.25  # Make this False if not using.
+quantile_step = 0.1  # Make this False if not using.
 
-ccgs = ["NHS Central London (Westminster)"]  # ["NHS Richmond"]  # ["all_ccgs"]
-# ccg = ccgs[1]
+ccgs = ["clustered_ccgs"]  #["NHS Hammersmith and Fulham", "NHS Central London (Westminster)", "NHS Lambeth"]  # Cluster 3 of 4
+# ["NHS Richmond"]
+# ["all_ccgs"]
+cluster_label = 3
+n_clusters = 4
+cluster_variables = "both_ncras_no2"
+
 test_year = 2017
 
 dates_as_inputs = False

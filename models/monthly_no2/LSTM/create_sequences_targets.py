@@ -29,11 +29,11 @@ else:
     aggregation = config.aggregation
 print(aggregation)
 
-no2_folder = join(join(join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN"), f"{laqn_start_date}_{laqn_end_date}"), "monthly")
+no2_folder = join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data", "LAQN", f"{laqn_start_date}_{laqn_end_date}", "monthly")
 no2_filenames = [file for method in aggregation for file in listdir(no2_folder) if re.findall(f"ccgs_monthly_{method}.csv", file)]
 print(no2_filenames)
 
-ncras_folder = join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "NCRAS")
+ncras_folder = join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data", "NCRAS")
 ncras_filename = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.csv" in f][0]
 # print(ncras_filename)
 
@@ -43,18 +43,31 @@ if quantile_step:
     aggregation = [str(len(aggregation)-1), "quantiles"]
 
 if len(ccgs) > 1:
-    save_folder = join(join(join(dirname(realpath(__file__)), "_".join(ccgs)), "_".join(aggregation)), f"{training_window}_month_tw")
+    save_folder = join(dirname(realpath(__file__)), "_".join(ccgs), "_".join(aggregation), f"{training_window}_month_tw")
+elif ccgs == ["clustered_ccgs"]:
+    label = f"cluster_{config.cluster_label}of{config.n_clusters}"
+    save_folder = join(dirname(realpath(__file__)), ccgs[0], label, "_".join(aggregation),
+                       f"{training_window}_month_tw")
 else:
-    save_folder = join(join(join(dirname(realpath(__file__)), ccgs[0]), "_".join(aggregation)),
+    save_folder = join(dirname(realpath(__file__)), ccgs[0], "_".join(aggregation),
                        f"{training_window}_month_tw")
 if not exists(save_folder):
     makedirs(save_folder)
 
 
 ncras_df = pd.read_csv(join(ncras_folder, ncras_filename)).set_index("date")
+
+cluster_filename = join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data", "exploration",
+                        f"{config.cluster_variables}_{config.n_clusters}_clusters_2013-2018.csv")
+cluster_df = pd.read_csv(cluster_filename)
+
 if ccgs == ["all_ccgs"]:
     ccgs = ncras_df["ccg_name"].unique().tolist()
-print(len(ccgs))
+elif ccgs == ["clustered_ccgs"]:
+    ccgs = cluster_df.loc[cluster_df["cluster_label"] == config.cluster_label, "ccg"].unique().tolist()
+print(f"{len(ccgs)} CCGs.")
+print(ccgs)
+
 ncras_df = ncras_df.loc[ncras_df["ccg_name"].isin(ccgs)]
 ncras_df.index = pd.to_datetime(ncras_df.index)
 # print(ncras_df)
