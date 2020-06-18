@@ -180,7 +180,7 @@ else:
 y_normaliser = StandardScaler().fit(training_targets)
 
 # Save to later apply un-normalisation to test sets for plotting/evaluation
-#joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
+joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
 joblib.dump(y_normaliser, join(save_folder, f"y_{age_category_rename}_normaliser.sav"))
 
 # Normalise input and output data
