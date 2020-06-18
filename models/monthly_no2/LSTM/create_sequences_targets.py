@@ -125,25 +125,25 @@ for ccg in ccgs:
 
     # Define the breast cancer data arrays for training and testing
     y_train = ncras_df.loc[(ncras_df.index.year != test_year) & (ncras_df.ccg_name == ccg), age_category] \
-        .values.reshape(-1, 1)
+        .values.reshape(-1)
     y_test = ncras_df.loc[(ncras_df.index.year == test_year) & (ncras_df.ccg_name == ccg), age_category] \
-        .values.reshape(-1, 1)
+        .values.reshape(-1)
 
-    # Fit the normaliser
-    x_normaliser = StandardScaler().fit(x_train)
-    y_normaliser = StandardScaler().fit(y_train)
-    # Save to later apply un-normalisation to test sets for plotting/evaluation
-    joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
-    joblib.dump(y_normaliser, join(save_folder, f"y_{age_category_rename}_normaliser.sav"))
-    # Normalise input and output data
-    x_train_norm = x_normaliser.transform(x_train)
-    y_train_norm = y_normaliser.transform(y_train).squeeze()
-    x_test_norm = x_normaliser.transform(x_test)
-    y_test_norm = y_normaliser.transform(y_test).squeeze()
+    # # Fit the normaliser
+    # x_normaliser = StandardScaler().fit(x_train)
+    # y_normaliser = StandardScaler().fit(y_train)
+    # # Save to later apply un-normalisation to test sets for plotting/evaluation
+    # #joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
+    # #joblib.dump(y_normaliser, join(save_folder, f"y_{age_category_rename}_normaliser.sav"))
+    # # Normalise input and output data
+    # x_train_norm = x_normaliser.transform(x_train)
+    # y_train_norm = y_normaliser.transform(y_train).squeeze()
+    # x_test_norm = x_normaliser.transform(x_test)
+    # y_test_norm = y_normaliser.transform(y_test).squeeze()
 
     # Create the input sequences for the LSTM
-    train_val_inputs = create_x_sequences(x_train_norm, len(y_train_norm), training_window)
-    test_inputs = create_x_sequences(x_test_norm, len(y_test_norm), training_window)
+    train_val_inputs = create_x_sequences(x_train, len(y_train), training_window)
+    test_inputs = create_x_sequences(x_test, len(y_test), training_window)
 
     # Split the training and validation sets
     validation_size = 0.2
@@ -155,9 +155,9 @@ for ccg in ccgs:
     val_seq_list.append(validation_sequences)
     val_targ_list.append(validation_targets)
     test_seq_list.append(test_inputs)
-    test_targ_list.append(y_test_norm)
+    test_targ_list.append(y_test)
     train_val_seq_list.append(train_val_inputs)
-    train_val_targ_list.append(y_train_norm)
+    train_val_targ_list.append(y_train)
 
     # Determine the date & CCG arrays and append to the relevant lists
     training_date_array = ncras_df.loc[(ncras_df.index.year != test_year) & (ncras_df.ccg_name == ccg), age_category].index.map(str).to_numpy().reshape(-1, 1)
@@ -185,6 +185,26 @@ train_val_targets = np.concatenate(train_val_targ_list, axis=0)
 # Dates and CCGs arrays (for plotting/evaluation)
 training_dates = np.concatenate(training_meta_list, axis=0)
 test_dates = np.concatenate(test_meta_list, axis=0)
+
+# Normalise all the arrays
+
+# Fit the normaliser to training set
+x_normaliser = StandardScaler().fit(train_val_sequences)
+y_normaliser = StandardScaler().fit(train_val_targets)
+
+# Save to later apply un-normalisation to test sets for plotting/evaluation
+joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
+joblib.dump(y_normaliser, join(save_folder, f"y_{age_category_rename}_normaliser.sav"))
+
+# Normalise input and output data
+training_sequences = x_normaliser.transform(training_sequences)
+training_targets = y_normaliser.transform(training_targets)
+validation_sequences = x_normaliser.transform(validation_sequences)
+validation_targets = y_normaliser.transform(validation_targets)
+train_val_sequences = x_normaliser.transform(train_val_sequences)
+train_val_targets = y_normaliser.transform(train_val_targets)
+test_sequences = x_normaliser.transform(test_targets)
+test_targets = y_normaliser.transform(test_targets)
 
 print(f"\nDropping NaNs\nTraining {np.isnan(training_sequences).any(axis=(1, 2)).sum()}\n"
       f"Validation {np.isnan(validation_sequences).any(axis=(1, 2)).sum()}\n"
