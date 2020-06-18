@@ -125,9 +125,9 @@ for ccg in ccgs:
 
     # Define the breast cancer data arrays for training and testing
     y_train = ncras_df.loc[(ncras_df.index.year != test_year) & (ncras_df.ccg_name == ccg), age_category] \
-        .values.reshape(-1)
+        .values.reshape(-1, 1)
     y_test = ncras_df.loc[(ncras_df.index.year == test_year) & (ncras_df.ccg_name == ccg), age_category] \
-        .values.reshape(-1)
+        .values.reshape(-1, 1)
 
     # # Fit the normaliser
     # x_normaliser = StandardScaler().fit(x_train)
@@ -147,7 +147,7 @@ for ccg in ccgs:
 
     # Split the training and validation sets
     validation_size = 0.2
-    training_sequences, validation_sequences, training_targets, validation_targets = train_test_split(train_val_inputs, y_train_norm, test_size=validation_size, random_state=1)
+    training_sequences, validation_sequences, training_targets, validation_targets = train_test_split(train_val_inputs, y_train, test_size=validation_size, random_state=1)
 
     # Add all the arrays to their relevant lists
     train_seq_list.append(training_sequences)
@@ -189,7 +189,7 @@ test_dates = np.concatenate(test_meta_list, axis=0)
 # Normalise all the arrays
 
 # Fit the normaliser to training set
-x_normaliser = StandardScaler().fit(train_val_sequences)
+x_normaliser = StandardScaler().fit(train_val_sequences.reshape(-1, train_val_sequences.shape[2]))
 y_normaliser = StandardScaler().fit(train_val_targets)
 
 # Save to later apply un-normalisation to test sets for plotting/evaluation
@@ -197,13 +197,13 @@ joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
 joblib.dump(y_normaliser, join(save_folder, f"y_{age_category_rename}_normaliser.sav"))
 
 # Normalise input and output data
-training_sequences = x_normaliser.transform(training_sequences)
+training_sequences = x_normaliser.transform(training_sequences.reshape(-1, training_sequences.shape[2])).reshape(training_sequences.shape)
 training_targets = y_normaliser.transform(training_targets)
-validation_sequences = x_normaliser.transform(validation_sequences)
+validation_sequences = x_normaliser.transform(validation_sequences.reshape(-1, validation_sequences.shape[2])).reshape(validation_sequences.shape)
 validation_targets = y_normaliser.transform(validation_targets)
-train_val_sequences = x_normaliser.transform(train_val_sequences)
+train_val_sequences = x_normaliser.transform(train_val_sequences.reshape(-1, train_val_sequences.shape[2])).reshape(train_val_sequences.shape)
 train_val_targets = y_normaliser.transform(train_val_targets)
-test_sequences = x_normaliser.transform(test_targets)
+test_sequences = x_normaliser.transform(test_sequences.reshape(-1, test_sequences.shape[2])).reshape(test_sequences.shape)
 test_targets = y_normaliser.transform(test_targets)
 
 print(f"\nDropping NaNs\nTraining {np.isnan(training_sequences).any(axis=(1, 2)).sum()}\n"
