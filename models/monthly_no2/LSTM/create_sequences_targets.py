@@ -243,9 +243,6 @@ np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), train_val_ta
 np.save(join(save_folder, "test_sequences.npy"), test_sequences_dropna)
 np.save(join(save_folder, f"test_targets_{age_category}.npy"), test_targets_dropna)
 
-np.save(join(save_folder, "train_val_sequences.npy"), train_val_sequences_dropna)
-np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), train_val_targets_dropna)
-
 np.save(join(save_folder, "train_val_dates.npy"), training_dates_dropna)
 np.save(join(save_folder, f"test_dates_{age_category}.npy"), test_dates_dropna)
 
