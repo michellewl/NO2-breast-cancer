@@ -6,114 +6,54 @@ import re
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 import joblib
+import config
 
-# aggregation = ["mean", "min", "max"]
-# aggregation = ["mean", "max"]
-# aggregation = ["mean"]
-quantile_step = 0.25
-aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
+
+# Define these from the config file
+training_window = config.training_window
+quantile_step = config.quantile_step
+ccgs = config.ccgs
+age_category = config.age_category
+print(f"{ccgs}\n{age_category}")
+if training_window:
+    input_description = f"{training_window}-month_tw"
+else:
+    input_description = "paired_in_out"
+print(input_description)
+age_category = age_category.replace("<", "").replace(">=", "")
+
+
+# Determine the appropriate monthly aggregation statistics for NO2
+if quantile_step:
+    aggregation = f"{int(1/quantile_step)}_quantiles"
+else:
+    aggregation = "_".join(config.aggregation)
 print(aggregation)
 
-no2_folder = join(join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "LAQN"), "monthly")
-no2_filenames = [file for method in aggregation for file in listdir(no2_folder) if re.findall(f"ccgs_monthly_{method}.csv", file)]
-print(no2_filenames)
+# Define the loading folder for the experiment
 
-ncras_folder = join(join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data"), "NCRAS")
-ncras_filename = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.csv" in f][0]
-print(ncras_filename)
+if len(ccgs) > 1:
+    load_folder = join(dirname(realpath(__file__)), "_".join(ccgs), aggregation)
+elif ccgs == ["clustered_ccgs"]:
+    label = f"cluster_{config.cluster_label}of{config.n_clusters}"
+    load_folder = join(dirname(realpath(__file__)), ccgs[0], label, aggregation)
+else:
+    load_folder = join(dirname(realpath(__file__)), ccgs[0], aggregation)
 
-ccgs = ["NHS Central London (Westminster)", "NHS Richmond"]
-ccg = ccgs[0]
-test_year = 2017
-
-ncras_df = pd.read_csv(join(ncras_folder, ncras_filename)).set_index("ccg_name").loc[ccgs]
-
-# print(ncras_df)
-
-###### NO2 PROCESSING
-no2_df_list = []
-
-for no2_file in no2_filenames:
-    no2_df = pd.read_csv(join(no2_folder, no2_file)).set_index("MeasurementDateGMT").loc[ncras_df.date.unique().tolist(), ccgs]
-    no2_df.index = pd.to_datetime(no2_df.index)
-    no2_df_list.append(no2_df)
-# print(no2_df_list)
-
-no2_training_array_list = []
-
-for no2_df in no2_df_list:
-    no2_array = no2_df.loc[no2_df.index.year != test_year, ccg].values.reshape(-1, 1)
-    no2_training_array_list.append(no2_array)
-# print(no2_training_array_list)
-
-no2_test_array_list = []
-
-for no2_df in no2_df_list:
-    no2_array = no2_df.loc[no2_df.index.year == test_year, ccg].values.reshape(-1, 1)
-    no2_test_array_list.append(no2_array)
-# print(no2_test_array_list)
+load_folder = join(load_folder, input_description)
 
 
-ncras_df.reset_index(inplace=True)
-ncras_df.set_index("date", inplace=True)
-ncras_df.index = pd.to_datetime(ncras_df.index)
+# Load numpy arrays
 
-age_categories = [col for col in ncras_df.columns if "age" in col]
-
-# One CCG, one age category
-
-age_category = age_categories[-1]
-print(f"{ccg}\n{age_category}")
-
-# Get data arrays and split x and y into train and test (prediction) sets.
-
-x_train = np.concatenate(no2_training_array_list, axis=1)
-x_test = np.concatenate(no2_test_array_list, axis=1)
-
-y_train = ncras_df.loc[(ncras_df.index.year != test_year) & (ncras_df.ccg_name == ccg), age_category]\
-    .values.reshape(-1, 1)
-y_test = ncras_df.loc[(ncras_df.index.year == test_year) & (ncras_df.ccg_name == ccg), age_category]\
-    .values.reshape(-1, 1)
-
-print(f"x train: {x_train.shape}"
-      f"\ny train: {y_train.shape}"
-      f"\nx test: {x_test.shape}"
-      f"\ny test: {y_test.shape}")
-
-# Save the arrays
-if not exists(ccg):
-    makedirs(ccg)
-save_folder = join(dirname(realpath(__file__)), ccg)
-
-if quantile_step:
-    aggregation = [str(len(aggregation)-1), "quantiles"]
-
-save_folder = join(save_folder, "_".join(aggregation))
-if not exists(save_folder):
-    makedirs(save_folder)
-# print(save_folder)
-
-np.save(join(save_folder, "x_train"), x_train)
-np.save(join(save_folder, "x_test"), x_test)
-np.save(join(save_folder, "y_train"), y_train)
-np.save(join(save_folder, "y_test"), y_test)
-
-# Normalise input and output training data
-x_normaliser = StandardScaler().fit(x_train)
-x_train = x_normaliser.transform(x_train)
-y_normaliser = StandardScaler().fit(y_train)
-y_train = y_normaliser.transform(y_train)
-
-# Save normalisation to later apply to test sets
-joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
-joblib.dump(y_normaliser, join(save_folder, "y_normaliser.sav"))
+x_train = np.load(join(load_folder, "training_inputs.npy"))
+y_train = np.load(join(load_folder, f"training_targets_{age_category}.npy"))
 
 # Fit the linear model
 lin_regressor = LinearRegression().fit(x_train, y_train)
 r_sq = lin_regressor.score(x_train, y_train)
 print(f"R squared on training set: {r_sq}")
 # Save the linear model
-joblib.dump(lin_regressor, join(save_folder, "linear_regressor.sav"))
+joblib.dump(lin_regressor, join(load_folder, "linear_regressor.sav"))
 
 
 

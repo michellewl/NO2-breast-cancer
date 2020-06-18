@@ -2,7 +2,7 @@ SpeciesCode = "NO2"
 laqn_start_date = "1997-01-01"
 laqn_end_date = "2018-01-01"
 
-training_window = 60  # consider the last X months of NO2 for each breast cancer diagnosis month
+training_window = False  # consider the last X months of NO2 for each breast cancer diagnosis month
 
 aggregation = False  # Choose from ["mean"], or ["min", "max"]. Make this False if not using.
 quantile_step = 0.1  # Make this False if not using.

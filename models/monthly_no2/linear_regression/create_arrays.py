@@ -34,13 +34,6 @@ else:
 print(aggregation)
 
 
-# # aggregation = ["mean", "min", "max"]
-# # aggregation = ["mean", "max"]
-# # aggregation = ["mean"]
-# quantile_step = 0.25
-# aggregation = [f"{int(method*100)}_quantile" for method in np.round(np.arange(0, 1+quantile_step, quantile_step), 2).tolist()]
-# print(aggregation)
-
 no2_folder = join(dirname(dirname(dirname(dirname(realpath(__file__))))), "data", "LAQN", f"{config.laqn_start_date}_{config.laqn_end_date}", "monthly")
 no2_filenames = [file for method in aggregation for file in listdir(no2_folder) if re.findall(f"ccgs_monthly_{method}.csv", file)]
 print(no2_filenames)
@@ -49,9 +42,6 @@ ncras_folder = join(dirname(dirname(dirname(dirname(realpath(__file__))))), "dat
 ncras_filename = [f for f in listdir(ncras_folder) if "ccgs_population_fraction.csv" in f][0]
 print(ncras_filename)
 
-# ccgs = config.ccgs  #["NHS Central London (Westminster)", "NHS Richmond"]
-# # ccg = ccgs[0]
-# test_year = 2017
 # Load the NCRAS breast cancer dataframe
 ncras_df = pd.read_csv(join(ncras_folder, ncras_filename)).set_index("date")
 
@@ -104,16 +94,10 @@ else:
                                              ncras_end_date
 
 # Initiate lists for arrays
-# All training arrays, including validation set (used for plotting/evaluation)
+# Train
 training_inputs_list = []
 training_targ_list = []
-# # Training arrays excluding validation set
-# train_inputs_list =[]
-# train_targ_list = []
-# # Validation arrays
-# val_seq_list =[]
-# val_targ_list = []
-# Test set arrays
+# Test
 test_inputs_list = []
 test_targ_list = []
 # Dates and CCG names for training and test sets (needed for plotting/evaluation)
@@ -149,31 +133,12 @@ for ccg in ccgs:
     y_test = ncras_df.loc[(ncras_df.index.year == test_year) & (ncras_df.ccg_name == ccg), age_category] \
         .values.reshape(-1, 1)
 
-    # # Fit the normaliser
-    # x_normaliser = StandardScaler().fit(x_train)
-    # y_normaliser = StandardScaler().fit(y_train)
-    # # Save to later apply un-normalisation to test sets for plotting/evaluation
-    # #joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
-    # #joblib.dump(y_normaliser, join(save_folder, f"y_{age_category_rename}_normaliser.sav"))
-    # # Normalise input and output data
-    # x_train_norm = x_normaliser.transform(x_train)
-    # y_train_norm = y_normaliser.transform(y_train).squeeze()
-    # x_test_norm = x_normaliser.transform(x_test)
-    # y_test_norm = y_normaliser.transform(y_test).squeeze()
     if training_window:
         # Create the input sequences
         x_train = create_x_sequences(x_train, len(y_train), training_window)
         x_test = create_x_sequences(x_test, len(y_test), training_window)
 
-    # # Split the training and validation sets
-    # validation_size = 0.2
-    # training_sequences, validation_sequences, training_targets, validation_targets = train_test_split(train_val_inputs, y_train_norm, test_size=validation_size, random_state=1)
-
     # Add all the arrays to their relevant lists
-    # train_seq_list.append(training_sequences)
-    # train_targ_list.append(training_targets)
-    # val_seq_list.append(validation_sequences)
-    # val_targ_list.append(validation_targets)
     training_inputs_list.append(x_train)
     training_targ_list.append(y_train)
     test_inputs_list.append(x_test)
@@ -194,15 +159,11 @@ for ccg in ccgs:
 # Training arrays
 training_inputs = np.concatenate(training_inputs_list, axis=0)
 training_targets = np.concatenate(training_targ_list, axis=0)
-# # Validation arrays
-# validation_sequences = np.concatenate(val_seq_list, axis=0)
-# validation_targets = np.concatenate(val_targ_list, axis=0)
+
 # Test arrays
 test_inputs = np.concatenate(test_inputs_list, axis=0)
 test_targets = np.concatenate(test_targ_list, axis=0)
-# # Training + validation arrays (for plotting/evaluation)
-# train_val_sequences = np.concatenate(train_val_seq_list, axis=0)
-# train_val_targets = np.concatenate(train_val_targ_list, axis=0)
+
 # Dates and CCGs arrays (for plotting/evaluation)
 training_dates = np.concatenate(training_meta_list, axis=0)
 test_dates = np.concatenate(test_meta_list, axis=0)
@@ -228,10 +189,7 @@ if training_window:
 else:
     training_inputs = x_normaliser.transform(training_inputs)
 training_targets = y_normaliser.transform(training_targets)
-# validation_sequences = x_normaliser.transform(validation_sequences)
-# validation_targets = y_normaliser.transform(validation_targets)
-# train_val_sequences = x_normaliser.transform(train_val_sequences)
-# train_val_targets = y_normaliser.transform(train_val_targets)
+
 if training_window:
     test_inputs = x_normaliser.transform(test_inputs.reshape(-1, test_inputs.shape[2])).reshape(test_inputs.shape)
 else:
@@ -251,19 +209,15 @@ else:
 
 training_inputs_dropna = training_inputs[np.logical_not(np.isnan(training_inputs).any(axis=drop_nan_axes))]
 training_targets_dropna = training_targets[np.logical_not(np.isnan(training_inputs).any(axis=drop_nan_axes))]
-# validation_sequences_dropna = validation_sequences[np.logical_not(np.isnan(validation_sequences).any(axis=(1, 2)))]
-# validation_targets_dropna = validation_targets[np.logical_not(np.isnan(validation_sequences).any(axis=(1, 2)))]
-# train_val_sequences_dropna = train_val_sequences[np.logical_not(np.isnan(train_val_sequences).any(axis=(1, 2)))]
-# train_val_targets_dropna = train_val_targets[np.logical_not(np.isnan(train_val_sequences).any(axis=(1, 2)))]
+
 test_inputs_dropna = test_inputs[np.logical_not(np.isnan(test_inputs).any(axis=drop_nan_axes))]
 test_targets_dropna = test_targets[np.logical_not(np.isnan(test_inputs).any(axis=drop_nan_axes))]
+
 training_dates_dropna = training_dates[np.logical_not(np.isnan(training_inputs).any(axis=drop_nan_axes))]
 test_dates_dropna = test_dates[np.logical_not(np.isnan(test_inputs).any(axis=drop_nan_axes))]
 
 
 print(f"\nTraining inputs {training_inputs_dropna.shape} Training targets {training_targets_dropna.shape}")
-# print(f"Validation sequences {validation_sequences_dropna.shape} Validation targets {validation_targets_dropna.shape}")
-# print(f"Train/val sequences {train_val_sequences_dropna.shape} Train/val targets {train_val_targets_dropna.shape}")
 print(f"Test inputs {test_inputs_dropna.shape} Test targets {test_targets_dropna.shape}")
 
 print(f"Training dates {training_dates_dropna.shape} Test dates {test_dates_dropna.shape}")
@@ -271,100 +225,11 @@ print(f"Training dates {training_dates_dropna.shape} Test dates {test_dates_drop
 # Save the arrays
 age_category = age_category_rename  # Can't have < or > in filepaths
 np.save(join(save_folder, f"training_inputs.npy"), training_inputs_dropna)
-# np.save(join(save_folder, "validation_sequences.npy"), validation_sequences_dropna)
 np.save(join(save_folder, f"training_targets_{age_category}.npy"), training_targets_dropna)
-# np.save(join(save_folder, f"validation_targets_{age_category}.npy"), validation_targets_dropna)
-# np.save(join(save_folder, "train_val_sequences.npy"), train_val_sequences_dropna)
-# np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), train_val_targets_dropna)
 np.save(join(save_folder, f"test_inputs.npy"), test_inputs_dropna)
 np.save(join(save_folder, f"test_targets_{age_category}.npy"), test_targets_dropna)
-
-# np.save(join(save_folder, "train_val_sequences.npy"), train_val_sequences_dropna)
-# np.save(join(save_folder, f"train_val_targets_{age_category}.npy"), train_val_targets_dropna)
 
 np.save(join(save_folder, f"training_dates.npy"), training_dates_dropna)
 np.save(join(save_folder, f"test_dates_{age_category}.npy"), test_dates_dropna)
 
 print("\nSaved npy arrays.")
-# ncras_df = pd.read_csv(join(ncras_folder, ncras_filename)).set_index("ccg_name").loc[ccgs]
-#
-# # print(ncras_df)
-#
-# ###### NO2 PROCESSING
-# no2_df_list = []
-#
-# for no2_file in no2_filenames:
-#     no2_df = pd.read_csv(join(no2_folder, no2_file)).set_index("MeasurementDateGMT").loc[ncras_df.date.unique().tolist(), ccgs]
-#     no2_df.index = pd.to_datetime(no2_df.index)
-#     no2_df_list.append(no2_df)
-# # print(no2_df_list)
-#
-# no2_training_array_list = []
-#
-# for no2_df in no2_df_list:
-#     no2_array = no2_df.loc[no2_df.index.year != test_year, ccg].values.reshape(-1, 1)
-#     no2_training_array_list.append(no2_array)
-# # print(no2_training_array_list)
-#
-# no2_test_array_list = []
-#
-# for no2_df in no2_df_list:
-#     no2_array = no2_df.loc[no2_df.index.year == test_year, ccg].values.reshape(-1, 1)
-#     no2_test_array_list.append(no2_array)
-# # print(no2_test_array_list)
-#
-#
-# ncras_df.reset_index(inplace=True)
-# ncras_df.set_index("date", inplace=True)
-# ncras_df.index = pd.to_datetime(ncras_df.index)
-#
-# # age_categories = [col for col in ncras_df.columns if "age" in col]
-# #
-# # # One CCG, one age category
-# #
-# # age_category = age_categories[-1]
-# # print(f"{ccg}\n{age_category}")
-#
-# # Get data arrays and split x and y into train and test (prediction) sets.
-#
-# x_train = np.concatenate(no2_training_array_list, axis=1)
-# x_test = np.concatenate(no2_test_array_list, axis=1)
-#
-# y_train = ncras_df.loc[(ncras_df.index.year != test_year) & (ncras_df.ccg_name == ccg), age_category]\
-#     .values.reshape(-1, 1)
-# y_test = ncras_df.loc[(ncras_df.index.year == test_year) & (ncras_df.ccg_name == ccg), age_category]\
-#     .values.reshape(-1, 1)
-#
-# print(f"x train: {x_train.shape}"
-#       f"\ny train: {y_train.shape}"
-#       f"\nx test: {x_test.shape}"
-#       f"\ny test: {y_test.shape}")
-#
-# # Save the arrays
-# # if not exists(ccg):
-# #     makedirs(ccg)
-# # save_folder = join(dirname(realpath(__file__)), ccg)
-# #
-# # if quantile_step:
-# #     aggregation = [str(len(aggregation)-1), "quantiles"]
-# #
-# # save_folder = join(save_folder, "_".join(aggregation))
-#
-#
-# # print(save_folder)
-#
-# # Normalise input and output training data
-# x_normaliser = StandardScaler().fit(x_train)
-# x_train = x_normaliser.transform(x_train)
-# y_normaliser = StandardScaler().fit(y_train)
-# y_train = y_normaliser.transform(y_train)
-#
-# # Save normalisation to later apply to test sets
-# joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
-# joblib.dump(y_normaliser, join(save_folder, f"y_normaliser.sav"))
-#
-# # Save normalised arrays
-# np.save(join(save_folder, "x_train"), x_train)
-# np.save(join(save_folder, "x_test"), x_test)
-# np.save(join(save_folder, "y_train"), y_train)
-# np.save(join(save_folder, "y_test"), y_test)
