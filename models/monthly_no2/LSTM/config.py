@@ -16,9 +16,7 @@ cluster_variables = "both_ncras_no2"
 
 test_year = 2017
 
-dates_as_inputs = False
-
-age_category = "age_cat_>=70"  #"age_cat_<40"  #"age_cat_40-69"  #"all_ages"
+age_category = "age_cat_>=70"  # "age_cat_>=70"  #"age_cat_<40"  #"age_cat_40-69"  #"all_ages"
 
 hidden_layer_size = 4
 batch_size = 30
