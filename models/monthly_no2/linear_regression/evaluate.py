@@ -5,6 +5,7 @@ import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from sklearn.metrics import r2_score, mean_squared_error
 import seaborn as sns
 sns.set(style="darkgrid")
 import config
@@ -73,17 +74,19 @@ y_train_norm, y_test_norm = y_normaliser.transform(y_train), y_normaliser.transf
 # Load linear regression model
 linear_regressor = joblib.load(join(load_folder, "linear_regressor.sav"))
 
-# Evaluate the model
-train_rsq_score = linear_regressor.score(x_train_norm, y_train_norm)
-test_rsq_score = linear_regressor.score(x_test_norm, y_test_norm)
-print(f"R squared on test set: {test_rsq_score}")
-
 # Predict and un-normalise
 y_train_predict_norm = linear_regressor.predict(x_train_norm)
 y_train_predict = y_normaliser.inverse_transform(y_train_predict_norm)
 
 y_predict_norm = linear_regressor.predict(x_test_norm)
 y_predict = y_normaliser.inverse_transform(y_predict_norm)
+
+# Compute the performance metrics
+train_rsq = r2_score(y_train, y_train_predict)
+train_mse = mean_squared_error(y_train, y_train_predict)
+test_rsq = r2_score(y_test, y_predict)
+test_mse = mean_squared_error(y_test, y_predict)
+print(f"Test R sq {test_rsq}\nTest MSE {test_mse}")
 
 # Load train/test dates and CCGs
 training_dates_ccgs = np.load(join(load_folder, f"training_dates.npy"), allow_pickle=True)
@@ -115,11 +118,11 @@ for ccg in ccgs:
     axs[0].plot(training_df.loc[training_df["ccg"] == ccg].index, training_df.loc[training_df["ccg"] == ccg, "prediction"], label="predicted")
     axs[0].set_title(f"Training set ({training_df.index.min()} to {training_df.index.max()})")
     # axs[0].set_title(f"Training set (2002-06 to {test_year-1}-12)")
-    axs[0].annotate(f"R$^2$ = {train_rsq_score}", xy=(0.05, 0.92), xycoords="axes fraction")
+    axs[0].annotate(f"R$^2$ = {train_rsq}  MSE = {train_mse}", xy=(0.05, 0.92), xycoords="axes fraction")
     axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "target"], label="observed")
     axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "prediction"], label="prediction")
     axs[1].set_title(f"Test set ({test_year})")
-    axs[1].annotate(f"R$^2$ = {test_rsq_score}", xy=(0.05, 0.92), xycoords="axes fraction")
+    axs[1].annotate(f"R$^2$ = {test_rsq}  MSE = {test_mse}", xy=(0.05, 0.92), xycoords="axes fraction")
 
     for ax in axs.flatten():
         ax.set_xlabel("Date")
@@ -130,6 +133,14 @@ for ccg in ccgs:
     plt.legend(loc=1)
     fig.subplots_adjust(top=0.5)
     fig.tight_layout()
+
+    # Simplify the CCG name for saving
+    ccg = ccg.replace("NHS ", "").replace(" ", "_")
+    try:
+        ccg = ccg[:ccg.index("_(")]
+    except:
+        pass
+
 
     fig.savefig(join(save_folder, f"{ccg}_time_series_{age_category_rename}.png"), dpi=fig.dpi)
     # plt.show()
