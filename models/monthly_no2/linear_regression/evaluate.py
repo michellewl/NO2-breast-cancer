@@ -1,5 +1,6 @@
 import numpy as np
-from os.path import join, dirname, realpath
+from os.path import join, dirname, realpath, exists
+from os import makedirs
 import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -84,21 +85,41 @@ y_train_predict = y_normaliser.inverse_transform(y_train_predict_norm)
 y_predict_norm = linear_regressor.predict(x_test_norm)
 y_predict = y_normaliser.inverse_transform(y_predict_norm)
 
+# Load train/test dates and CCGs
+training_dates_ccgs = np.load(join(load_folder, f"training_dates.npy"), allow_pickle=True)
+test_dates_ccgs = np.load(join(load_folder, f"test_dates_{age_category_rename}.npy"), allow_pickle=True)
+
+training_df, test_df = pd.DataFrame(training_dates_ccgs, columns=["date", "ccg"]).set_index("date"), pd.DataFrame(test_dates_ccgs, columns=["date", "ccg"]).set_index("date")
+training_df["target"], training_df["prediction"] = y_train, y_train_predict
+test_df["target"], test_df["prediction"] = y_test, y_predict
+training_df.index, test_df.index = pd.to_datetime(training_df.index), pd.to_datetime(test_df.index)
+print(f"\nTraining dataframe {training_df.shape}, Test dataframe {test_df.shape}")
+ccgs = test_df["ccg"].unique()
+print(f"{len(ccgs)} CCGs in test set")
+
 # Plot prediction
-train_dates = pd.date_range(f"2002-06", f"{test_year}-01", freq="M")
-test_dates = pd.date_range(f"{test_year}-01", f"{test_year+1}-01", freq="M")
+# train_dates = pd.date_range(f"2002-06", f"{test_year}-01", freq="M")
+# test_dates = pd.date_range(f"{test_year}-01", f"{test_year+1}-01", freq="M")
+
+save_folder = join(load_folder, "results_plots")
+if not exists(save_folder):
+    makedirs(save_folder)
+
+print("\nPlotting...")
 
 for ccg in ccgs:
+    print(ccg)
     fig, axs = plt.subplots(2, 1, figsize=(15, 10))
 
-    axs[0].plot(train_dates, y_train, label="observed")
-    axs[0].plot(train_dates, y_train_predict, label="predicted")
-    axs[0].set_title(f"Training set (2002-06 to {test_year-1}-12)")
-    axs[0].annotate(f"R$^2$ = {train_rsq_score}", xy=(train_dates.min(), y_train.max()))
-    axs[1].plot(test_dates, y_test, label="observed")
-    axs[1].plot(test_dates, y_predict, label="prediction")
+    axs[0].plot(training_df.loc[training_df["ccg"] == ccg].index, training_df.loc[training_df["ccg"] == ccg, "target"], label="observed")
+    axs[0].plot(training_df.loc[training_df["ccg"] == ccg].index, training_df.loc[training_df["ccg"] == ccg, "prediction"], label="predicted")
+    axs[0].set_title(f"Training set ({training_df.index.min()} to {training_df.index.max()})")
+    # axs[0].set_title(f"Training set (2002-06 to {test_year-1}-12)")
+    axs[0].annotate(f"R$^2$ = {train_rsq_score}", xy=(0.05, 0.92), xycoords="axes fraction")
+    axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "target"], label="observed")
+    axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "prediction"], label="prediction")
     axs[1].set_title(f"Test set ({test_year})")
-    axs[1].annotate(f"R$^2$ = {test_rsq_score}", xy=(test_dates.min(), y_test.max()))
+    axs[1].annotate(f"R$^2$ = {test_rsq_score}", xy=(0.05, 0.92), xycoords="axes fraction")
 
     for ax in axs.flatten():
         ax.set_xlabel("Date")
@@ -110,8 +131,11 @@ for ccg in ccgs:
     fig.subplots_adjust(top=0.5)
     fig.tight_layout()
 
-    fig.savefig(join(load_folder, f"{ccg}time_series_{age_category}.png"), dpi=fig.dpi)
-    plt.show()
+    fig.savefig(join(save_folder, f"{ccg}_time_series_{age_category_rename}.png"), dpi=fig.dpi)
+    # plt.show()
+
+    # At the end of the loop, close the figure
+    plt.close()
 
     if len(aggregation) == 2 and not quantile_step:
         # Visualise linear regression model
@@ -140,5 +164,5 @@ for ccg in ccgs:
         plt.legend(loc=1)
         scatter_fig.tight_layout()
 
-        scatter_fig.savefig(join(load_folder, f"{ccg}scatter_plot_{age_category}.png"), dpi=scatter_fig.dpi)
+        scatter_fig.savefig(join(save_folder, f"{ccg}_scatter_plot_{age_category_rename}.png"), dpi=scatter_fig.dpi)
         plt.show()
