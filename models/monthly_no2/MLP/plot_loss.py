@@ -1,7 +1,7 @@
 import torch
 from os.path import join, dirname, realpath
 from dataset import NO2Dataset
-from lstm_model_class import LSTM
+from mlp_class import MLP
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="darkgrid")
@@ -15,7 +15,7 @@ test_year = config.test_year
 age_category = config.age_category
 print(f"{ccgs}\n{age_category}")
 age_category = age_category.replace("<", "").replace(">=", "")
-hidden_layer_size = config.hidden_layer_size
+hidden_layer_sizes = config.hidden_layer_sizes
 batch_size = config.batch_size
 torch.manual_seed(config.random_seed)
 
@@ -36,12 +36,12 @@ if ccgs == ["clustered_ccgs"]:
 training_dataset = NO2Dataset(join(load_folder, "training_sequences.npy"), join(load_folder, f"training_targets_{age_category}.npy"))
 
 # Load the model
-filename = f"lstm_model_{age_category}_hl{hidden_layer_size}"
+filename = f"mlp_model_{age_category}_{len(hidden_layer_sizes)}hls"
 if config.noise_standard_deviation:
     filename += f"_augmented{config.noise_standard_deviation}".replace(".", "")
 
 checkpoint = torch.load(join(load_folder, filename+".tar"))
-model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=hidden_layer_size)
+model = MLP(h_sizes=config.hidden_layer_sizes, out_size=config.out_size)
 
 # Load the required info for plotting losses
 training_losses = checkpoint["training_loss_history"]
@@ -56,7 +56,7 @@ if config.compute_test_loss:
 
 # Initiate the plot figure and define the filename for saving
 fig, ax = plt.subplots(figsize=(12, 8))
-save_name = f"loss_history_{age_category}_hl{hidden_layer_size}"
+save_name = f"loss_history_{age_category}_{len(hidden_layer_sizes)}hls"
 
 # Plot training and validation loss histories
 ax.plot(range(epochs+1), training_losses, label="training loss", alpha=0.8)
@@ -80,7 +80,7 @@ plt.legend()
 plt.xlabel("epoch")
 plt.ylabel("MSE loss")
 ccgs = ", ".join(ccgs)
-plt.title(f"LSTM training loss for {ccgs}")
+plt.title(f"mlp training loss for {ccgs}")
 
 # plt.show()
 fig.tight_layout()

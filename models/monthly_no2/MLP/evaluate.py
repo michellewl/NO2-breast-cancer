@@ -5,7 +5,7 @@ from os.path import join, dirname, realpath, exists
 from os import makedirs
 from dataset import NO2Dataset
 from torch.utils.data import DataLoader
-from lstm_model_class import LSTM
+from mlp_class import MLP
 import joblib
 from sklearn.metrics import r2_score, mean_squared_error
 import matplotlib.pyplot as plt
@@ -22,7 +22,7 @@ model_epoch = config.model_epoch
 age_category = config.age_category
 print(f"{ccgs}\n{age_category}")
 age_category = age_category.replace("<", "").replace(">=", "")
-hidden_layer_size = config.hidden_layer_size
+hidden_layer_sizes = config.hidden_layer_sizes
 batch_size = config.batch_size
 torch.manual_seed(config.random_seed)
 
@@ -47,11 +47,11 @@ training_dataloader = DataLoader(training_dataset, batch_size=batch_size)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size)
 
 # Load the model
-filename = f"lstm_model_{age_category}_hl{hidden_layer_size}"
+filename = f"mlp_model_{age_category}_{len(hidden_layer_sizes)}hls"
 if config.noise_standard_deviation:
     filename += f"_augmented{config.noise_standard_deviation}".replace(".", "")
 checkpoint = torch.load(join(load_folder, filename+".tar"))
-model = LSTM(input_size=training_dataset.nfeatures(), hidden_layer_size=hidden_layer_size)
+model = MLP(h_sizes=config.hidden_layer_sizes, out_size=config.out_size)
 print(model)
 
 if model_epoch == "best":
@@ -157,12 +157,12 @@ for ccg in ccgs:
         ax.set_ylabel(f"Breast cancer cases ({age_category.replace( '_', ' ')}) per capita")
 
     # Add an overall title for the figure
-    fig.suptitle(f"LSTM model for {ccg}")
+    fig.suptitle(f"mlp model for {ccg}")
 
     # Add experiment details as annotations in the figure
     plt.figtext(0.1, 0.5, f"{training_window} month training window",
                 fontsize=12)
-    plt.figtext(0.1, 0.48, f"LSTM hidden layer size {model.hidden_layer_size}", fontsize=12)
+    plt.figtext(0.1, 0.48, f"mlp hidden layer sizes {config.hidden_layer_sizes}", fontsize=12)
     plt.figtext(0.1, 0.46, f"Model learnt at epoch {epoch}", fontsize=12)
 
     # Add a legend and adjust figure spacing
@@ -177,9 +177,9 @@ for ccg in ccgs:
     except:
         pass
 
-    plot_filename = f"{ccg}_timeseries_{age_category}_hl{hidden_layer_size}"
+    plot_filename = f"{ccg}_timeseries_{age_category}_{len(hidden_layer_sizes)}hls"
     if model_epoch == "final":
-        plot_filename = f"{ccg}_timeseries_{age_category}_overfit_hl{hidden_layer_size}"
+        plot_filename = f"{ccg}_timeseries_{age_category}_overfit_{len(hidden_layer_sizes)}hls"
     if config.noise_standard_deviation:
         plot_filename += f"_augmented{config.noise_standard_deviation}".replace(".", "")
 
