@@ -18,6 +18,5 @@ class LSTM(nn.Module):
         # print(lstm_out.shape, hidden_state_cell_state[0].shape, hidden_state_cell_state[1].shape)
         # Pass the lstm output to the linear layer, which calculates the dot product between
         # the layer input and weight matrix.
-        prediction = self.linear(lstm_out[:, -1, :]).reshape(-1)  # We want the most recent hidden state
-        # print(prediction.shape)
+        prediction = self.linear(lstm_out[:, -1, :])  # We want the most recent hidden state
         return prediction
