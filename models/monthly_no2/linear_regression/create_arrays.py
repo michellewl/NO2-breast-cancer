@@ -158,10 +158,12 @@ for ccg in ccgs:
 # Concatentate the full arrays from the lists of arrays
 # Training arrays
 training_inputs = np.concatenate(training_inputs_list, axis=0)
+training_inputs = training_inputs.reshape(training_inputs.shape[0], -1)
 training_targets = np.concatenate(training_targ_list, axis=0)
 
 # Test arrays
 test_inputs = np.concatenate(test_inputs_list, axis=0)
+test_inputs = test_inputs.reshape(test_inputs.shape[0], -1)
 test_targets = np.concatenate(test_targ_list, axis=0)
 
 # Dates and CCGs arrays (for plotting/evaluation)
@@ -172,10 +174,7 @@ test_dates = np.concatenate(test_meta_list, axis=0)
 print(training_inputs.shape)
 
 # Fit the normaliser to training set. StandardScaler can only take up to 2 dimensions.
-if training_window:
-    x_normaliser = StandardScaler().fit(training_inputs.reshape(-1, training_inputs.shape[2]))
-else:
-    x_normaliser = StandardScaler().fit(training_inputs)
+x_normaliser = StandardScaler().fit(training_inputs)
 
 y_normaliser = StandardScaler().fit(training_targets)
 
@@ -184,28 +183,19 @@ joblib.dump(x_normaliser, join(save_folder, "x_normaliser.sav"))
 joblib.dump(y_normaliser, join(save_folder, f"y_{age_category_rename}_normaliser.sav"))
 
 # Normalise input and output data
-if training_window:
-    training_inputs = x_normaliser.transform(training_inputs.reshape(-1, training_inputs.shape[2])).reshape(training_inputs.shape)
-else:
-    training_inputs = x_normaliser.transform(training_inputs)
+training_inputs = x_normaliser.transform(training_inputs)
 training_targets = y_normaliser.transform(training_targets)
 
-if training_window:
-    test_inputs = x_normaliser.transform(test_inputs.reshape(-1, test_inputs.shape[2])).reshape(test_inputs.shape)
-else:
-    test_inputs = x_normaliser.transform(test_inputs)
+test_inputs = x_normaliser.transform(test_inputs)
 test_targets = y_normaliser.transform(test_targets)
 
 
 print(f"\nDropping NaNs\nTraining {np.isnan(training_inputs).any(axis=1).sum()}\n"
       f"Test {np.isnan(test_inputs).any(axis=1).sum()}")
 
-# Look along dimensions 1 & 2 for NaNs
+# Look along dimensions 1 for NaNs
 
-if training_window:
-    drop_nan_axes = (1, 2)
-else:
-    drop_nan_axes = 1
+drop_nan_axes = 1
 
 training_inputs_dropna = training_inputs[np.logical_not(np.isnan(training_inputs).any(axis=drop_nan_axes))]
 training_targets_dropna = training_targets[np.logical_not(np.isnan(training_inputs).any(axis=drop_nan_axes))]
