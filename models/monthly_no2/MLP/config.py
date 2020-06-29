@@ -2,12 +2,12 @@ SpeciesCode = "NO2"
 laqn_start_date = "1997-01-01"
 laqn_end_date = "2018-01-01"
 
-training_window = 60  # consider the last X months of NO2 for each breast cancer diagnosis month
+training_window = 24  # consider the last X months of NO2 for each breast cancer diagnosis month
 
 aggregation = False  # Choose from ["mean"], or ["min", "max"]. Make this False if not using.
 quantile_step = 0.1  # Make this False if not using.
 
-ccgs = ["all_ccgs"]  #["NHS Hammersmith and Fulham", "NHS Central London (Westminster)", "NHS Lambeth"]  # Cluster 3 of 4
+ccgs = ["clustered_ccgs"]  #["NHS Hammersmith and Fulham", "NHS Central London (Westminster)", "NHS Lambeth"]  # Cluster 3 of 4
 # ["NHS Richmond"]
 # ["all_ccgs"]
 #["clustered_ccgs"]
