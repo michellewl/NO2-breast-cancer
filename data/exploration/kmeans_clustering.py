@@ -10,10 +10,11 @@ from matplotlib.colors import ListedColormap
 import seaborn as sns
 import adjustText as aT
 
-variable = "both_ncras_no2"  # ncras or no2
+variable = "ncras"  # ncras or no2 or both_ncras_no2
 cluster_start_year = 2013
 cluster_end_year = 2018
-number_of_clusters = 4
+number_of_clusters = 3
+save_results = False
 
 laqn_start_date = "1997-01-01"
 laqn_end_date = "2018-01-01"
@@ -100,7 +101,15 @@ print(f"\nRetained {len(cluster_ccgs)} CCGs.")
 # Perform clustering
 print("\nK-MEANS CLUSTERING\n")
 
-kmeans = KMeans(n_clusters=number_of_clusters, random_state=1)
+if variable == "ncras" and number_of_clusters == 3:
+    start_points = np.array([[0.00016], [0.00012], [0.0001]])
+    random_state = False
+    n_init = 1
+else:
+    start_points = "k-means++"
+    random_state = 1
+    n_init = 10
+kmeans = KMeans(n_clusters=number_of_clusters, init=start_points, n_init=n_init, random_state=random_state)
 kmeans.fit(cluster_array)
 
 print(f"Cluster centres\n{kmeans.cluster_centers_}\n")
@@ -110,7 +119,8 @@ ccg_cluster_df = pd.DataFrame()
 ccg_cluster_df["ccg"] = cluster_ccgs
 ccg_cluster_df["cluster_label"] = kmeans.labels_
 # print(cluster_df.shape)
-ccg_cluster_df.to_csv(f"{variable}_{number_of_clusters}_clusters_{cluster_start_year}-{cluster_end_year}.csv")
+if save_results:
+    ccg_cluster_df.to_csv(f"{variable}_{number_of_clusters}_clusters_{cluster_start_year}-{cluster_end_year}.csv")
 
 # Load London map
 load_folder = join(dirname(realpath(__file__)), "London_GIS", "statistical-gis-boundaries-london", "ESRI")
@@ -171,4 +181,5 @@ aT.adjust_text(borough_text, expand_points=(1, 1), expand_text=(1, 1))
 # Display the plot and save as a PNG file.
 plt.show()
 
-fig.savefig(f"{variable}_{number_of_clusters}_clusters_{cluster_start_year}-{cluster_end_year}.png", dpi=fig.dpi)
+if save_results:
+    fig.savefig(f"{variable}_{number_of_clusters}_clusters_{cluster_start_year}-{cluster_end_year}.png", dpi=fig.dpi)
