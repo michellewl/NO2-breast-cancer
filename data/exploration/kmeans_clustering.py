@@ -109,6 +109,7 @@ else:
     start_points = "k-means++"
     random_state = 1
     n_init = 10
+
 kmeans = KMeans(n_clusters=number_of_clusters, init=start_points, n_init=n_init, random_state=random_state)
 kmeans.fit(cluster_array)
 
