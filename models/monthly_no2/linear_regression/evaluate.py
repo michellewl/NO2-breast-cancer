@@ -60,16 +60,16 @@ load_folder = join(load_folder, input_description)
 # if quantile_step:
 #     aggregation = [str(len(aggregation)-1), "quantiles"]
 # load_folder = join(join(dirname(realpath(__file__)), ccg), "_".join(aggregation))
-x_train, x_test = np.load(join(load_folder, f"training_inputs.npy")), np.load(join(load_folder, "test_inputs.npy"))
-y_train, y_test = np.load(join(load_folder, f"training_targets_{age_category_rename}.npy")), np.load(join(load_folder, f"test_targets_{age_category_rename}.npy"))
+x_train_norm, x_test_norm = np.load(join(load_folder, f"training_inputs.npy")), np.load(join(load_folder, "test_inputs.npy"))
+y_train_norm, y_test_norm = np.load(join(load_folder, f"training_targets_{age_category_rename}.npy")), np.load(join(load_folder, f"test_targets_{age_category_rename}.npy"))
 
 # Load normalisation
 x_normaliser = joblib.load(join(load_folder, "x_normaliser.sav"))
 y_normaliser = joblib.load(join(load_folder, f"y_{age_category_rename}_normaliser.sav"))
-
-# Normalise
-x_train_norm, x_test_norm = x_normaliser.transform(x_train), x_normaliser.transform(x_test)
-y_train_norm, y_test_norm = y_normaliser.transform(y_train), y_normaliser.transform(y_test)
+#
+# # Normalise
+# x_train_norm, x_test_norm = x_normaliser.transform(x_train), x_normaliser.transform(x_test)
+# y_train_norm, y_test_norm = y_normaliser.transform(y_train), y_normaliser.transform(y_test)
 
 # Load linear regression model
 linear_regressor = joblib.load(join(load_folder, "linear_regressor.sav"))
@@ -77,9 +77,12 @@ linear_regressor = joblib.load(join(load_folder, "linear_regressor.sav"))
 # Predict and un-normalise
 y_train_predict_norm = linear_regressor.predict(x_train_norm)
 y_train_predict = y_normaliser.inverse_transform(y_train_predict_norm)
+y_train = y_normaliser.inverse_transform(y_train_norm)
 
 y_predict_norm = linear_regressor.predict(x_test_norm)
 y_predict = y_normaliser.inverse_transform(y_predict_norm)
+y_test = y_normaliser.inverse_transform(y_test_norm)
+
 
 # Compute the performance metrics
 train_rsq = r2_score(y_train, y_train_predict)

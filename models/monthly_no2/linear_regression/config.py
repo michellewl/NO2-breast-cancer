@@ -2,7 +2,7 @@ SpeciesCode = "NO2"
 laqn_start_date = "1997-01-01"
 laqn_end_date = "2018-01-01"
 
-# sklearn can't do 3D inputs so keep this as False for now.
+# Make this False if just doing paired inputs/outputs
 training_window = 24  # consider the last X months of NO2 for each breast cancer diagnosis month
 
 aggregation = False  # Choose from ["mean"], or ["min", "max"]. Make this False if not using.
@@ -15,5 +15,5 @@ cluster_variables = "both_ncras_no2"
 
 test_year = 2017
 
-age_category = "all_ages"  # "age_cat_>=70"  #"age_cat_<40"  #"age_cat_40-69"  #"all_ages"
+age_category = "age_cat_40-69"  # "age_cat_>=70"  #"age_cat_<40"  #"age_cat_40-69"  #"all_ages"
 
