@@ -80,7 +80,8 @@ plt.legend()
 plt.xlabel("epoch")
 plt.ylabel("MSE loss")
 ccgs = ", ".join(ccgs)
-plt.title(f"LSTM training loss for {ccgs}")
+if config.include_plot_title:
+    plt.title(f"LSTM training loss for {ccgs}")
 
 # plt.show()
 fig.tight_layout()
