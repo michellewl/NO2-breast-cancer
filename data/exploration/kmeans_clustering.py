@@ -10,11 +10,11 @@ from matplotlib.colors import ListedColormap
 import seaborn as sns
 import adjustText as aT
 
-variable = "ncras"  # ncras or no2 or both_ncras_no2
+variable = "no2"  # ncras or no2 or both_ncras_no2
 cluster_start_year = 2013
 cluster_end_year = 2018
-number_of_clusters = 3
-save_results = False
+number_of_clusters = 2
+save_results = True
 
 laqn_start_date = "1997-01-01"
 laqn_end_date = "2018-01-01"
