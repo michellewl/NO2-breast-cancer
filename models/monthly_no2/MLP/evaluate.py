@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from mlp_class import MLP
 import joblib
 from sklearn.metrics import r2_score, mean_squared_error
+from functions import mape_score
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="darkgrid")
@@ -87,7 +88,8 @@ print(f"Train targets {training_targets.shape}, Train predict {training_predicti
 # Compute the performance metrics
 train_rsq = r2_score(training_targets, training_prediction)
 train_mse = mean_squared_error(training_targets, training_prediction)
-print(f"Train R sq {train_rsq}\nTrain MSE {train_mse}")
+train_mape = mape_score(training_targets, training_prediction)
+print(f"Train R sq {train_rsq}\nTrain MSE {train_mse}\nTrain MAPE {train_mape}")
 
 # Make predictions on test set
 test_targets = []
@@ -111,7 +113,8 @@ print(f"\nTest targets {test_targets.shape}, Test predict {test_prediction.shape
 # Compute the performance metrics
 test_rsq = r2_score(test_targets, test_prediction)
 test_mse = mean_squared_error(test_targets, test_prediction)
-print(f"Test R sq {test_rsq}\nTest MSE {test_mse}")
+test_mape = mape_score(test_targets, test_prediction)
+print(f"Test R sq {test_rsq}\nTest MSE {test_mse}\nTest MAPE {test_mape}")
 
 # Make dataframes for the train and test set predictions and targets
 training_dates_ccgs = np.load(join(load_folder, "train_val_dates.npy"), allow_pickle=True)
@@ -142,14 +145,14 @@ for ccg in ccgs:
     axs[0].plot(training_df.loc[training_df["ccg"] == ccg].index, training_df.loc[training_df["ccg"] == ccg, "prediction"], label="prediction")
     # Give the plot a title and annotations
     axs[0].set_title(f"Training set (2002-06 to {test_year-1}-12)")
-    axs[0].annotate(f"R$^2$ = {train_rsq}  MSE = {train_mse}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
+    axs[0].annotate(f"R$^2$ = {train_rsq}  MSE = {train_mse}  MAPE = {train_mape}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
 
     # Plot test predictions and targets
     axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "target"], label="observed")
     axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "prediction"], label="prediction")
     # Give the plot a title and annotations
     axs[1].set_title(f"Test set ({test_year})")
-    axs[1].annotate(f"R$^2$ = {test_rsq}  MSE = {test_mse}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
+    axs[1].annotate(f"R$^2$ = {test_rsq}  MSE = {test_mse}  MAPE = {test_mape}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
 
     # Set axes labels for both subplots
     for ax in axs.flatten():
@@ -190,3 +193,20 @@ for ccg in ccgs:
 
     # At the end of the loop, close the figure
     plt.close()
+
+if not exists(join(load_folder, "metrics.txt")):
+    metrics_log = open(join(load_folder, "metrics.txt"), "w")
+else:
+    metrics_log = open(join(load_folder, "metrics.txt"), "a")
+
+metrics_log.write("METRICS LOG\n"
+                  f"Age category: {age_category}\n"
+                  f"Hidden layer sizes: {hidden_layer_sizes}\n"
+                  f"Data augmentation: Gaussian noise std {config.noise_standard_deviation}\n\n"
+                  f"Train R sq: {train_rsq}\n"
+                  f"Train MSE: {train_mse}\n"
+                  f"Train MAPE: {train_mape}\n\n"
+                  f"Test R sq: {test_rsq}\n"
+                  f"Test MSE: {test_mse}\n"
+                  f"Test MAPE: {test_mape}\n\n\n")
+metrics_log.close()
