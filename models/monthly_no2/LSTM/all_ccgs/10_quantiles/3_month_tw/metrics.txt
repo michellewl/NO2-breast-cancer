@@ -1,0 +1,14 @@
+METRICS LOG
+Age category: all_ages
+Hidden layer size: 4
+Data augmentation: Gaussian noise std 0.3
+
+Train R sq: 0.013655031602995527
+Train MSE: 1.3593494108121718e-09
+Train MAPE: 31.237113710482372
+
+Test R sq: -0.15351800303006824
+Test MSE: 1.7385521910995294e-09
+Test MAPE: 26.972076220390125
+
+

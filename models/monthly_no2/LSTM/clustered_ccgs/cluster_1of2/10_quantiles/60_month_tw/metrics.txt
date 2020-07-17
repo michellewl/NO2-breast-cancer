@@ -1,0 +1,56 @@
+METRICS LOG
+Age category: age_cat_40
+Hidden layer size: 4
+Data augmentation: Gaussian noise std 0.3
+
+Train R sq: -0.01933658619556855
+Train MSE: 1.1546777423099286e-10
+Train MAPE: -121630454.02597402
+
+Test R sq: -0.1971843305553671
+Test MSE: 1.6413961856365233e-10
+Test MAPE: -104322177.77777778
+
+
+METRICS LOG
+Age category: age_cat_40-69
+Hidden layer size: 4
+Data augmentation: Gaussian noise std 0.3
+
+Train R sq: -0.003716371272726615
+Train MSE: 1.0921255899631888e-08
+Train MAPE: -7442394.953617811
+
+Test R sq: -0.11146181399064625
+Test MSE: 1.3280125443770885e-08
+Test MAPE: -16494494.444444444
+
+
+METRICS LOG
+Age category: age_cat_70
+Hidden layer size: 4
+Data augmentation: Gaussian noise std 0.3
+
+Train R sq: 0.0040645265507704975
+Train MSE: 3.285865091129381e-08
+Train MAPE: -2595079998.218924
+
+Test R sq: -0.0003048692336238279
+Test MSE: 3.713153517992396e-08
+Test MAPE: -1104986168.8888888
+
+
+METRICS LOG
+Age category: all_ages
+Hidden layer size: 4
+Data augmentation: Gaussian noise std 0.3
+
+Train R sq: 0.017228117583408697
+Train MSE: 1.9031616282916275e-09
+Train MAPE: 40.60848087459416
+
+Test R sq: -0.0967753917537979
+Test MSE: 2.4432185163902886e-09
+Test MAPE: 41.84038374159071
+
+
