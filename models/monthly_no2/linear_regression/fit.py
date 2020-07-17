@@ -53,7 +53,8 @@ lin_regressor = LinearRegression().fit(x_train, y_train)
 r_sq = lin_regressor.score(x_train, y_train)
 print(f"R squared on training set: {r_sq}")
 # Save the linear model
-joblib.dump(lin_regressor, join(load_folder, "linear_regressor.sav"))
+age_category_rename = age_category.replace("<", "").replace(">=", "")  # Can't have < or > in filepaths
+joblib.dump(lin_regressor, join(load_folder, f"linear_regressor_{age_category_rename}.sav"))
 
 
 

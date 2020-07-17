@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.metrics import r2_score, mean_squared_error
+from functions import mape_score
 import seaborn as sns
 sns.set(style="darkgrid")
 import config
@@ -72,7 +73,7 @@ y_normaliser = joblib.load(join(load_folder, f"y_{age_category_rename}_normalise
 # y_train_norm, y_test_norm = y_normaliser.transform(y_train), y_normaliser.transform(y_test)
 
 # Load linear regression model
-linear_regressor = joblib.load(join(load_folder, "linear_regressor.sav"))
+linear_regressor = joblib.load(join(load_folder, f"linear_regressor_{age_category_rename}.sav"))
 
 # Predict and un-normalise
 y_train_predict_norm = linear_regressor.predict(x_train_norm)
@@ -87,9 +88,11 @@ y_test = y_normaliser.inverse_transform(y_test_norm)
 # Compute the performance metrics
 train_rsq = r2_score(y_train, y_train_predict)
 train_mse = mean_squared_error(y_train, y_train_predict)
+train_mape = mape_score(y_train, y_train_predict)
 test_rsq = r2_score(y_test, y_predict)
 test_mse = mean_squared_error(y_test, y_predict)
-print(f"Test R sq {test_rsq}\nTest MSE {test_mse}")
+test_mape = mape_score(y_test, y_predict)
+print(f"Test R sq {test_rsq}\nTest MSE {test_mse}\nTest MAPE {test_mape}\n")
 
 # Load train/test dates and CCGs
 training_dates_ccgs = np.load(join(load_folder, f"training_dates.npy"), allow_pickle=True)
@@ -121,11 +124,11 @@ for ccg in ccgs:
     axs[0].plot(training_df.loc[training_df["ccg"] == ccg].index, training_df.loc[training_df["ccg"] == ccg, "prediction"], label="predicted")
     axs[0].set_title(f"Training set ({training_df.index.min()} to {training_df.index.max()})")
     # axs[0].set_title(f"Training set (2002-06 to {test_year-1}-12)")
-    axs[0].annotate(f"R$^2$ = {train_rsq}  MSE = {train_mse}", xy=(0.05, 0.92), xycoords="axes fraction")
+    axs[0].annotate(f"R$^2$ = {train_rsq}  MSE = {train_mse}  MAPE = {train_mape}", xy=(0.05, 0.92), xycoords="axes fraction")
     axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "target"], label="observed")
     axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "prediction"], label="prediction")
     axs[1].set_title(f"Test set ({test_year})")
-    axs[1].annotate(f"R$^2$ = {test_rsq}  MSE = {test_mse}", xy=(0.05, 0.92), xycoords="axes fraction")
+    axs[1].annotate(f"R$^2$ = {test_rsq}  MSE = {test_mse}  MAPE = {test_mape}", xy=(0.05, 0.92), xycoords="axes fraction")
 
     for ax in axs.flatten():
         ax.set_xlabel("Date")
@@ -180,3 +183,18 @@ for ccg in ccgs:
 
         scatter_fig.savefig(join(save_folder, f"{ccg}_scatter_plot_{age_category_rename}.png"), dpi=scatter_fig.dpi)
         plt.show()
+
+if not exists(join(load_folder, "metrics.txt")):
+    metrics_log = open(join(load_folder, "metrics.txt"), "w")
+else:
+    metrics_log = open(join(load_folder, "metrics.txt"), "a")
+
+metrics_log.write("METRICS LOG\n"
+                  f"Age category: {age_category}\n"
+                  f"Train R sq: {train_rsq}\n"
+                  f"Train MSE: {train_mse}\n"
+                  f"Train MAPE: {train_mape}\n\n"
+                  f"Test R sq: {test_rsq}\n"
+                  f"Test MSE: {test_mse}\n"
+                  f"Test MAPE: {test_mape}\n\n\n")
+metrics_log.close()
