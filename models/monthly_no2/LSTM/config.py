@@ -7,16 +7,18 @@ training_window = 60  # consider the last X months of NO2 for each breast cancer
 aggregation = False  # Choose from ["mean"], or ["min", "max"]. Make this False if not using.
 quantile_step = 0.1  # Make this False if not using.
 
-ccgs = ["clustered_ccgs"]  # ["clustered_ccgs"]  # ["NHS Richmond"] # ["all_ccgs"]
-cluster_label = 1
-n_clusters = 2
+ccgs = ["all_ccgs"]  # ["clustered_ccgs"]  # ["NHS Richmond"] # ["all_ccgs"]
+cluster_label = 3
+n_clusters = 4
 cluster_variables = "both_ncras_no2"
+
+age_category = "all_ages"  # "age_cat_>=70"  #"age_cat_<40"  #"age_cat_40-69"  #"all_ages"
+
+noise_standard_deviation = 0.3  # Standard deviation of Gaussian noise (been using 0.3)
 
 test_year = 2017
 
-age_category = "age_cat_<40"  # "age_cat_>=70"  #"age_cat_<40"  #"age_cat_40-69"  #"all_ages"
-
-hidden_layer_size = 4
+hidden_layer_size = 100
 batch_size = 30
 num_epochs = 10000
 batches_per_print = False
@@ -28,5 +30,4 @@ learning_rate = 0.001
 model_epoch = "best"  # Choose "final" or "best" model.
 
 compute_test_loss = True
-noise_standard_deviation = 0.3  # Standard deviation of Gaussian noise (been using 0.3)
 include_plot_title = True
