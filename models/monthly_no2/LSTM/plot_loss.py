@@ -75,13 +75,13 @@ if config.noise_standard_deviation:
 ax.scatter(best_epoch, min(val_losses))
 
 # Add a legend and title, label the plot and axes
-plt.annotate(f"epoch {best_epoch}", (best_epoch*1.05, min(val_losses)))
-plt.legend()
-plt.xlabel("epoch")
-plt.ylabel("MSE loss")
+plt.annotate(f"epoch {best_epoch}", (best_epoch*1.05, min(val_losses)), fontsize="x-large")
+plt.legend(fontsize="x-large")
+plt.xlabel("epoch", fontsize="x-large")
+plt.ylabel("MSE loss", fontsize="x-large")
 ccgs = ", ".join(ccgs)
 if config.include_plot_title:
-    plt.title(f"LSTM training loss for {ccgs}")
+    plt.title(f"LSTM training loss for {ccgs}", fontsize="x-large")
 
 # plt.show()
 fig.tight_layout()
