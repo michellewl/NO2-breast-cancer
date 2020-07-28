@@ -145,14 +145,18 @@ for ccg in ccgs:
     axs[0].plot(training_df.loc[training_df["ccg"] == ccg].index, training_df.loc[training_df["ccg"] == ccg, "prediction"], label="prediction")
     # Give the plot a title and annotations
     axs[0].set_title(f"Training set (2002-06 to {test_year-1}-12)")
-    axs[0].annotate(f"R$^2$ = {train_rsq}  MSE = {train_mse}  MAPE = {train_mape}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
+    if config.plot_annotate_metrics:
+        axs[0].annotate(f"R$^2$ = {train_rsq}  MSE = {train_mse}  MAPE = {train_mape}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
+    axs[0].legend()
 
     # Plot test predictions and targets
     axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "target"], label="observed")
     axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "prediction"], label="prediction")
     # Give the plot a title and annotations
     axs[1].set_title(f"Test set ({test_year})")
-    axs[1].annotate(f"R$^2$ = {test_rsq}  MSE = {test_mse}  MAPE = {test_mape}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
+    if config.plot_annotate_metrics:
+        axs[1].annotate(f"R$^2$ = {test_rsq}  MSE = {test_mse}  MAPE = {test_mape}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=12)
+    axs[1].legend()
 
     # Set axes labels for both subplots
     for ax in axs.flatten():
@@ -160,16 +164,16 @@ for ccg in ccgs:
         ax.set_ylabel(f"Breast cancer cases ({age_category.replace( '_', ' ')}) per capita")
 
     # Add an overall title for the figure
-    fig.suptitle(f"mlp model for {ccg}")
+    if config.plot_title:
+        fig.suptitle(f"MLP model for {ccg}")
 
     # Add experiment details as annotations in the figure
     plt.figtext(0.1, 0.5, f"{training_window} month training window",
                 fontsize=12)
-    plt.figtext(0.1, 0.48, f"mlp hidden layer sizes {config.hidden_layer_sizes}", fontsize=12)
+    plt.figtext(0.1, 0.48, f"MLP hidden layer sizes {config.hidden_layer_sizes[1:]}", fontsize=12)
     plt.figtext(0.1, 0.46, f"Model learnt at epoch {epoch}", fontsize=12)
 
     # Add a legend and adjust figure spacing
-    plt.legend(loc=1)
     fig.subplots_adjust(top=0.5)
     fig.tight_layout(pad=2)
 
@@ -201,7 +205,7 @@ else:
 
 metrics_log.write("METRICS LOG\n"
                   f"Age category: {age_category}\n"
-                  f"Hidden layer sizes: {hidden_layer_sizes}\n"
+                  f"Hidden layer sizes: {hidden_layer_sizes[1:]}\n"
                   f"Data augmentation: Gaussian noise std {config.noise_standard_deviation}\n\n"
                   f"Train R sq: {train_rsq}\n"
                   f"Train MSE: {train_mse}\n"

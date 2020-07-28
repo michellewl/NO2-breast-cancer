@@ -123,20 +123,24 @@ for ccg in ccgs:
     axs[0].plot(training_df.loc[training_df["ccg"] == ccg].index, training_df.loc[training_df["ccg"] == ccg, "target"], label="observed")
     axs[0].plot(training_df.loc[training_df["ccg"] == ccg].index, training_df.loc[training_df["ccg"] == ccg, "prediction"], label="predicted")
     axs[0].set_title(f"Training set ({training_df.index.min()} to {training_df.index.max()})")
+    axs[0].legend()
     # axs[0].set_title(f"Training set (2002-06 to {test_year-1}-12)")
-    axs[0].annotate(f"R$^2$ = {train_rsq}  MSE = {train_mse}  MAPE = {train_mape}", xy=(0.05, 0.92), xycoords="axes fraction")
+    if config.plot_annotate_metrics:
+        axs[0].annotate(f"R$^2$ = {train_rsq}  MSE = {train_mse}  MAPE = {train_mape}", xy=(0.05, 0.92), xycoords="axes fraction")
+
     axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "target"], label="observed")
     axs[1].plot(test_df.loc[test_df["ccg"] == ccg].index, test_df.loc[test_df["ccg"] == ccg, "prediction"], label="prediction")
     axs[1].set_title(f"Test set ({test_year})")
-    axs[1].annotate(f"R$^2$ = {test_rsq}  MSE = {test_mse}  MAPE = {test_mape}", xy=(0.05, 0.92), xycoords="axes fraction")
+    axs[1].legend()
+    if config.plot_annotate_metrics:
+        axs[1].annotate(f"R$^2$ = {test_rsq}  MSE = {test_mse}  MAPE = {test_mape}", xy=(0.05, 0.92), xycoords="axes fraction")
 
     for ax in axs.flatten():
         ax.set_xlabel("Date")
         ax.set_ylabel(f"Breast cancer cases ({age_category.replace( '_', ' ')}) per capita")
+    if config.plot_title:
+        fig.suptitle(f"Linear regression for {ccg}")
 
-    fig.suptitle(f"Linear regression for {ccg}")
-
-    plt.legend(loc=1)
     fig.subplots_adjust(top=0.5)
     fig.tight_layout()
 

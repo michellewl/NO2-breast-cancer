@@ -80,7 +80,8 @@ plt.legend(fontsize="x-large")
 plt.xlabel("epoch", fontsize="x-large")
 plt.ylabel("MSE loss", fontsize="x-large")
 ccgs = ", ".join(ccgs)
-plt.title(f"mlp training loss for {ccgs}", fontsize="x-large")
+if config.plot_title:
+    plt.title(f"mlp training loss for {ccgs}", fontsize="x-large")
 
 #plt.show()
 fig.tight_layout()

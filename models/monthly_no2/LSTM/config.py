@@ -12,7 +12,7 @@ cluster_label = 1
 n_clusters = 2
 cluster_variables = "both_ncras_no2"
 
-age_category = "age_cat_40-69"  # "age_cat_>=70"  #"age_cat_<40"  #"age_cat_40-69"  #"all_ages"
+age_category = "all_ages"  # "age_cat_>=70"  #"age_cat_<40"  #"age_cat_40-69"  #"all_ages"
 
 noise_standard_deviation = 0.3  # Standard deviation of Gaussian noise (been using 0.3)
 
@@ -31,3 +31,4 @@ model_epoch = "best"  # Choose "final" or "best" model.
 
 compute_test_loss = False
 include_plot_title = False
+include_metrics = False
