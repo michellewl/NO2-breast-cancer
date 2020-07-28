@@ -110,3 +110,17 @@ Test MSE: 3.51967450740176e-08
 Test MAPE: -969511780.3921568
 
 
+METRICS LOG
+Age category: all_ages
+Hidden layer size: 4
+Data augmentation: Gaussian noise std 0.3
+
+Train R sq: 0.2924334597602819
+Train MSE: 1.3892582639840612e-09
+Train MAPE: 33.666114665510044
+
+Test R sq: 0.03443691061024512
+Test MSE: 2.025919432213641e-09
+Test MAPE: 34.421184016209025
+
+
